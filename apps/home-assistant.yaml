@@ -1,0 +1,152 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home-assistant
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: home-assistant-config
+  namespace: home-assistant
+  labels:
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/name: home-assistant
+  annotations:
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+  labels:
+  annotations:
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8123
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/instance: home-assistant
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant-sonos
+  namespace: home-assistant
+  labels:
+  annotations:
+spec:
+  type: LoadBalancer
+  loadBalancerIP: "${sonos_advertise_ip}" 
+  ports:
+  - port: 1400
+    targetPort: 1400
+    protocol: TCP
+    name: sonos-advertise
+  selector:
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/instance: home-assistant
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant-internal
+  namespace: home-assistant
+  annotations:
+    nginx.org/websocket-services: home-assistant
+spec:
+  tls:
+    - hosts:
+        - home.${local_ingress_domain}
+         
+  ingressClassName: nginx
+  rules:
+  - host: home.${local_ingress_domain}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: home-assistant
+            port:
+              number: 8123
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+  labels:
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/name: home-assistant
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+      app.kubernetes.io/instance: home-assistant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: home-assistant
+        app.kubernetes.io/instance: home-assistant
+    spec:
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      enableServiceLinks: true
+      hostNetwork: true
+      containers:
+        - name: home-assistant
+          image: "ghcr.io/home-assistant/home-assistant:2025.8.3"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: null
+          env:
+            - name: "TZ"
+              value: "${cluster_tz}"
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          livenessProbe:
+            tcpSocket:
+              port: 8123
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8123
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              port: 8123
+            initialDelaySeconds: 0
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant-config
