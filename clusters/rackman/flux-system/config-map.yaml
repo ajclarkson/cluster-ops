@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-config
+  namespace: flux-system
+data:
+  local_ingress_domain: "local.clarksons.me"
+  external_ingress_domain: "clarksons.me"
+  web_ingress_ip: 10.0.0.30
+  cluster_tz: "Europe/London"
+  mqtt_ip: 10.0.0.31
+  sonos_advertise_ip: 10.0.0.33 
+  onepassword_vault_name: "rackman"
+  external_vip: 10.0.0.50
