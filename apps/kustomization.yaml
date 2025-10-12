@@ -4,4 +4,3 @@ resources:
 - mqtt.yaml
 - esphome.yaml
 - home-assistant.yaml
-- node-red.yaml
