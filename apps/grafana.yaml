@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grafana
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: grafana-credentials 
+  namespace: grafana
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: user
+    remoteRef:
+      key: "grafana-user-credentials"
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: "grafana-user-credentials"
+      property: password
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+spec:
+  chart:
+    spec:
+      chart: grafana
+      version: "8.10.0"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  interval: 15m
+  timeout: 5m
+  releaseName: grafana
+  targetNamespace: grafana
+  values:
+    persistence:
+      enabled: true
+      size: 5Gi
+
+    admin:
+      existingSecret: grafana-credentials
+      userKey: user
+      passwordKey: password
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-local
+  namespace: grafana
+  annotations:
+    nginx.org/websocket-services: grafana
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: grafana.${local_ingress_domain}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+
