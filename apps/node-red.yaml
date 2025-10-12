@@ -91,7 +91,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: node-red
-        image: nodered/node-red:4.0.9-22-minimal
+        image: nodered/node-red:4.1.0-22-minimal
         imagePullPolicy: Always
         ports:
         - containerPort: 1880
