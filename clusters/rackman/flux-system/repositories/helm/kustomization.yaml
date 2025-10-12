@@ -5,3 +5,4 @@ resources:
 - ingress-nginx.yaml
 - external-secrets.yaml
 - cert-manager.yaml
+- longhorn.yaml
