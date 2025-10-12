@@ -22,4 +22,10 @@ spec:
   timeout: 5m
   releaseName: longhorn
   targetNamespace: longhorn-system
+  values:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      tls: true
+      host: longhorn.local.clarksons.me
 
