@@ -4,4 +4,5 @@ resources:
 - mqtt.yaml
 - esphome.yaml
 - home-assistant.yaml
+- zigbee2mqtt.yaml
 - node-red.yaml

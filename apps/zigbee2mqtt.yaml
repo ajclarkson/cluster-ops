@@ -1,0 +1,154 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: zigbee2mqtt
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: zigbee2mqtt-data
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/instance: zigbee2mqtt
+    app.kubernetes.io/name: zigbee2mqtt
+  annotations:
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zigbee2mqtt
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/instance: zigbee2mqtt
+    app.kubernetes.io/name: zigbee2mqtt
+  annotations:
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: zigbee2mqtt
+    app.kubernetes.io/instance: zigbee2mqtt
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zigbee2mqtt
+  namespace: zigbee2mqtt
+  annotations:
+    nginx.org/websocket-services: zigbee2mqtt 
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+spec:
+  tls:
+    - hosts:
+        - hub.${local_ingress_domain}
+  ingressClassName: nginx
+  rules:
+  - host: hub.${local_ingress_domain}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: zigbee2mqtt
+            port:
+              number: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/instance: zigbee2mqtt
+    app.kubernetes.io/name: zigbee2mqtt
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zigbee2mqtt
+      app.kubernetes.io/instance: zigbee2mqtt
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zigbee2mqtt
+        app.kubernetes.io/instance: zigbee2mqtt
+    spec:
+      
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      containers:
+        - name: zigbee2mqtt
+          image: "koenkk/zigbee2mqtt:2.4.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: "${cluster_tz}"
+            - name: ZIGBEE2MQTT_DATA
+              value: /data
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: ttyacm
+              mountPath: /dev/ttyUSB0
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: zigbee2mqtt-data
+        - name: ttyacm
+          hostPath:
+            path: /dev/ttyUSB0
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kube.local/device
+                operator: In
+                values:
+                - zigbee-controller
