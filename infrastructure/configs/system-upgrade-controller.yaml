@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+data:
+  SYSTEM_UPGRADE_CONTROLLER_DEBUG: "false"
+  SYSTEM_UPGRADE_CONTROLLER_THREADS: "2"
+  SYSTEM_UPGRADE_JOB_ACTIVE_DEADLINE_SECONDS: "900"
+  SYSTEM_UPGRADE_JOB_BACKOFF_LIMIT: "99"
+  SYSTEM_UPGRADE_JOB_IMAGE_PULL_POLICY: Always
+  SYSTEM_UPGRADE_JOB_KUBECTL_IMAGE: rancher/kubectl:v1.25.4
+  SYSTEM_UPGRADE_JOB_PRIVILEGED: "true"
+  SYSTEM_UPGRADE_JOB_TTL_SECONDS_AFTER_FINISH: "900"
+  SYSTEM_UPGRADE_PLAN_POLLING_INTERVAL: 15m
+kind: ConfigMap
+metadata:
+  name: default-controller-env
+  namespace: system-upgrade
+---
+# Server plan
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: server-plan
+  namespace: system-upgrade
+spec:
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/control-plane
+      operator: In
+      values:
+      - "true"
+  serviceAccountName: system-upgrade
+  upgrade:
+    image: rancher/k3s-upgrade
+  version: v1.34.1+k3s1
+---
+# Agent plan
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: agent-plan
+  namespace: system-upgrade
+spec:
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/control-plane
+      operator: DoesNotExist
+  prepare:
+    args:
+    - prepare
+    - server-plan
+    image: rancher/k3s-upgrade
+  serviceAccountName: system-upgrade
+  upgrade:
+    image: rancher/k3s-upgrade
+  version: v1.34.1+k3s1
