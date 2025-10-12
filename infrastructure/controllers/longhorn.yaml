@@ -23,6 +23,8 @@ spec:
   releaseName: longhorn
   targetNamespace: longhorn-system
   values:
+    persistence:
+      reclaimPolicy: Retain
     ingress:
       enabled: true
       ingressClassName: nginx
