@@ -5,3 +5,4 @@ resources:
 - kube-vip.yaml
 - ingress-nginx.yaml
 - external-secrets.yaml
+- longhorn.yaml
