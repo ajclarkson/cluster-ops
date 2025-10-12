@@ -29,8 +29,6 @@ metadata:
   labels:
     app.kubernetes.io/instance: mqtt
     app.kubernetes.io/name: mosquitto
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "managed-nfs-storage"
 spec:
   accessModes:
     - "ReadWriteOnce"
