@@ -6,4 +6,3 @@ resources:
 - ingress-nginx.yaml
 - external-secrets.yaml
 - longhorn.yaml
-- system-upgrade-controller.yaml
