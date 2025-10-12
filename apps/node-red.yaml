@@ -84,6 +84,8 @@ spec:
         app.kubernetes.io/name: node-red
     spec:
       securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
