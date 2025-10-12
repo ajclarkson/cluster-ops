@@ -26,3 +26,5 @@ spec:
     controller:
       service:
         loadBalancerIP: "${web_ingress_ip}"
+       extraArgs:
+        default-ssl-certificate: "cert-manager/local.clarksons.me-tls"
