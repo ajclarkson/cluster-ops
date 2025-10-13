@@ -7,3 +7,4 @@ resources:
 - cert-manager.yaml
 - longhorn.yaml
 - grafana.yaml
+- influxdb.yaml
