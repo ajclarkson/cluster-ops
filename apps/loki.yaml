@@ -36,7 +36,7 @@ spec:
           ruler: loki-ruler
 
         s3:
-          s3forcepathstyle: true
+          s3forcepathstyle: false
           # <1>
           # http<s>://<username>:<secret>@<fqdn>:<port>
           endpoint: http://loki-user:2LZpMXybz6zguYdfP7h3@minio.minio.svc.cluster.local:9000
