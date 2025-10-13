@@ -29,6 +29,18 @@ spec:
       auth_enabled: false
       commonConfig:
         replication_factor: 1
+      storage:
+        type: s3
+        bucketNames:
+          chunks: loki-chunks
+          ruler: loki-ruler
+
+      s3:
+        s3forcepathstyle: true
+        # <1>
+        # http<s>://<username>:<secret>@<fqdn>:<port>
+        endpoint: http://loki-user:2LZpMXybz6zguYdfP7h3@minio.minio.svc.cluster.local:9000
+     
       schemaConfig:
         configs:
           - from: "2024-04-01"
@@ -47,13 +59,7 @@ spec:
         enable_api: true
 
     minio:
-      enabled: true
-      persistence:
-        enabled: true
-        annotations: {}
-        accessMode: ReadWriteOnce
-        size: 5Gi
-
+      enabled: false
 
     lokiCanary:
       enabled: false
