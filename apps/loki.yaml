@@ -36,7 +36,6 @@ spec:
           ruler: loki-ruler
 
         s3:
-          s3ForcePathStyle: false
           endpoint: http://minio.minio.svc.cluster.local:9000
           secretAccessKey: 2LZpMXybz6zguYdfP7h3
           accessKeyId: loki-user
