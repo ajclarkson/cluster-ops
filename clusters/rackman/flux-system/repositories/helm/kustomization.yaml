@@ -8,3 +8,4 @@ resources:
 - longhorn.yaml
 - grafana.yaml
 - influxdb.yaml
+- minio.yaml
