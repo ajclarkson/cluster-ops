@@ -9,4 +9,3 @@ resources:
 - node-red.yaml
 - influxdb.yaml
 - minio.yaml
-- loki.yaml
