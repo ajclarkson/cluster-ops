@@ -36,7 +36,7 @@ spec:
 
         s3:
           s3forcepathstyle: true
-          endpoint: https://loki.user:2LZpMXybz6zguYdfP7h3@minio-minio.svc.cluster.local:9000
+          endpoint: https://loki.user:2LZpMXybz6zguYdfP7h3@minio.minio.svc.cluster.local:9000
 
       storage_config:
         tsdb_shipper:
