@@ -39,7 +39,7 @@ spec:
           s3ForcePathStyle: true
           endpoint: http://minio.minio.svc.cluster.local:9000
           secretAccessKey: 2LZpMXybz6zguYdfP7h3
-          accessKeyId: loki-user
+          accessKeyId: loki.user
      
       schemaConfig:
         configs:
