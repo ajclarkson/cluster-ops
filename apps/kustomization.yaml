@@ -8,6 +8,4 @@ resources:
 - grafana.yaml
 - node-red.yaml
 - influxdb.yaml
-- minio.yaml
-- loki.yaml
 - promtail.yaml
