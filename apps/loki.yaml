@@ -92,6 +92,7 @@ spec:
       replicas: 1
 
     global:
+      extraArgs: ["--config.expand-env=true"]
       extraEnvFrom:
         - secretRef:
             name: minio-loki-credentials
