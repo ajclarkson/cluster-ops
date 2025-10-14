@@ -100,6 +100,12 @@ spec:
 
     singleBinary:
       replicas: 1
+      extraEnv:
+        - name: "SB_TEST"
+          value: "SB_MODE"
+      
+      extraArgs:
+        - '-config.expand-env=true'
 
     global:
       extraArgs:
