@@ -126,3 +126,7 @@ spec:
         existingSecret: minio-loki-credentials
         existingSecretKey: password
         policy: readwrite
+
+    buckets:
+      - name: loki-ruler
+      - name: loki-chunks
