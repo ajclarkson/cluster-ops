@@ -53,6 +53,16 @@ spec:
       userKey: user
       passwordKey: password
 
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Loki
+            type: loki
+            uid: loki
+            access: proxy
+            url: http://loki-read-headless.loki.svc.cluster.local:3100
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
