@@ -29,7 +29,7 @@ spec:
     destinations:
       - name: loki
         type: loki
-        url: http://loki-gateway.loki/loki/api/push
+        url: http://loki-gateway.loki/loki/api/v1/push
 
     podLogs:
       enabled: true
