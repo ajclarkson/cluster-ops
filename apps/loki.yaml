@@ -90,6 +90,12 @@ spec:
 
     singleBinary:
       replicas: 1
+      extraArgs:
+          - "-config.expand-env=true"
+
+      extraEnvFrom:
+        - secretRef:
+            name: minio-loki-credentials
 
     global:
       extraArgs:
@@ -101,10 +107,30 @@ spec:
 
     # Zero out replica counts of other deployment modes
     backend:
+      extraArgs:
+          - "-config.expand-env=true"
+
+      extraEnvFrom:
+        - secretRef:
+            name: minio-loki-credentials
       replicas: 0
     read:
+      extraArgs:
+          - "-config.expand-env=true"
+
+      extraEnvFrom:
+        - secretRef:
+            name: minio-loki-credentials
+
       replicas: 0
     write:
+      extraArgs:
+          - "-config.expand-env=true"
+
+      extraEnvFrom:
+        - secretRef:
+            name: minio-loki-credentials
+
       replicas: 0
 
     ingester:
