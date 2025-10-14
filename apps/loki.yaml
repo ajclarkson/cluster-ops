@@ -40,6 +40,8 @@ kind: HelmRelease
 metadata:
   name: loki
   namespace: loki
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 spec:
   chart:
     spec:
@@ -108,21 +110,8 @@ spec:
         - '-config.expand-env=true'
       extraEnvFrom:
         - secretRef:
-            name: loki-minio-secret
+            name: minio-loki-credentials
 
-
-    global:
-      extraArgs:
-          - "-config.expand-env=true"
-
-      extraEnv:
-        - name: ADAM_TEST
-          value: "TESTING_ENV"
-
-
-      extraEnvFrom:
-        - secretRef:
-            name: loki-minio-secret
 
     # Zero out replica counts of other deployment modes
     backend:
