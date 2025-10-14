@@ -10,3 +10,4 @@ resources:
 - influxdb.yaml
 - promtail.yaml
 - minio.yaml
+- loki.yaml
