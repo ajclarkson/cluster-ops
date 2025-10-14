@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8s-monitoring
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: k8s-monitoring
+  namespace: k8s-monitoring
+spec:
+  chart:
+    spec:
+      chart: k8s-monitoring
+      version: "2.1.4"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  interval: 15m
+  timeout: 5m
+  releaseName: k8s-monitoring
+  targetNamespace: k8s-monitoring
+  values:
+    cluster:
+      name: k8s-monitoring
+
+    destinations:
+      - name: loki
+        type: loki
+        url: http://loki-gateway.loki/loki/api/push
+
+    podLogs:
+      enabled: true
+      destinations:
+        - loki
+
+    alloy-metrics:
+      enabled: true
+
+    alloy-logs: 
+      enabled: true
+      nodeSelector:
+        logging: "true"

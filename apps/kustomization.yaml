@@ -11,3 +11,4 @@ resources:
 - promtail.yaml
 - minio.yaml
 - loki.yaml
+- k8s-monitoring.yaml
