@@ -105,6 +105,11 @@ spec:
       extraArgs:
           - "-config.expand-env=true"
 
+      extraEnv:
+        - name: ADAM_TEST
+          value: "TESTING_ENV"
+
+
       extraEnvFrom:
         - secretRef:
             name: loki-minio-secret
