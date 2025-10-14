@@ -59,8 +59,8 @@ spec:
         s3:
           s3ForcePathStyle: true
           endpoint: http://minio.minio.svc.cluster.local:9000
-          secretAccessKey: ${MINIO_SECRET_ACCESS_KEY}
-          accessKeyId: ${MINIO_ACCESS_KEY_ID}
+          secretAccessKey: 2LZpMXybz6zguYdfP7h3
+          accessKeyId: loki.user
      
       schemaConfig:
         configs:
@@ -90,19 +90,7 @@ spec:
 
     singleBinary:
       replicas: 1
-    global:
-      extraEnv:
-        - name: MINIO_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: minio-loki-credentials
-              key: MINIO_ACCESS_KEY_ID
-        - name: MINIO_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: minio-loki-credentials
-              key: MINIO_SECRET_ACCESS_KEY
-
+      
     # Zero out replica counts of other deployment modes
     backend:
       replicas: 0
