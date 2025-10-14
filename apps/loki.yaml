@@ -25,6 +25,16 @@ spec:
       key: "minio-loki-credentials"
       property: password
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: loki-minio-secret
+  namespace: loki
+type: Opaque
+data:
+  TEST_ID: dGVzdA==
+  TEST_SECRET: dGVzdA==
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -90,12 +100,6 @@ spec:
 
     singleBinary:
       replicas: 1
-      extraArgs:
-          - "-config.expand-env=true"
-
-      extraEnvFrom:
-        - secretRef:
-            name: minio-loki-credentials
 
     global:
       extraArgs:
@@ -103,34 +107,14 @@ spec:
 
       extraEnvFrom:
         - secretRef:
-            name: minio-loki-credentials
+            name: loki-minio-secret
 
     # Zero out replica counts of other deployment modes
     backend:
-      extraArgs:
-          - "-config.expand-env=true"
-
-      extraEnvFrom:
-        - secretRef:
-            name: minio-loki-credentials
       replicas: 0
     read:
-      extraArgs:
-          - "-config.expand-env=true"
-
-      extraEnvFrom:
-        - secretRef:
-            name: minio-loki-credentials
-
       replicas: 0
     write:
-      extraArgs:
-          - "-config.expand-env=true"
-
-      extraEnvFrom:
-        - secretRef:
-            name: minio-loki-credentials
-
       replicas: 0
 
     ingester:
