@@ -94,7 +94,7 @@ spec:
     global:
       extraEnvFrom:
         - secretRef:
-          name: minio-loki-credentials
+            name: minio-loki-credentials
 
     # Zero out replica counts of other deployment modes
     backend:
