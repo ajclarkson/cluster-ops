@@ -37,7 +37,7 @@ spec:
         - loki
 
     alloy-metrics:
-      enabled: true
+      enabled: false
 
     alloy-logs: 
       enabled: true
