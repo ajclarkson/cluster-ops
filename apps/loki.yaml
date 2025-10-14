@@ -25,23 +25,13 @@ spec:
       key: "minio-loki-credentials"
       property: password
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: loki-minio-secret
-  namespace: loki
-type: Opaque
-data:
-  TEST_ID: dGVzdA==
-  TEST_SECRET: dGVzdA==
----
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: loki
   namespace: loki
   annotations:
-    kustomize.toolkit.fluxcd.io/substitute: disabled
+    kustomize.toolkit.fluxcd.io/substitute: disabled # this is required to prevent flux overwriting the env variable strings
 spec:
   chart:
     spec:
@@ -102,9 +92,6 @@ spec:
 
     singleBinary:
       replicas: 1
-      extraEnv:
-        - name: "SB_TEST"
-          value: "SB_MODE"
       
       extraArgs:
         - '-config.expand-env=true'
