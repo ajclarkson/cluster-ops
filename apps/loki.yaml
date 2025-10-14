@@ -90,6 +90,7 @@ spec:
 
     singleBinary:
       replicas: 1
+    global:
       extraEnv:
         - name: MINIO_ACCESS_KEY_ID
           valueFrom:
