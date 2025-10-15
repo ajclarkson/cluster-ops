@@ -9,3 +9,4 @@ resources:
 - grafana.yaml
 - influxdb.yaml
 - minio.yaml
+- cloudnative-pg.yaml
