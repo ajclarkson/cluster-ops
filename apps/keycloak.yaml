@@ -102,3 +102,27 @@ spec:
     enabled: false
   # Additional Options  
   additionalOptions: []
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: keycloak
+  annotations:
+    nginx.org/websocket-services: keycloak
+spec:
+  tls:
+    - hosts:
+        - sso.${local_ingress_domain}
+         
+  ingressClassName: nginx
+  rules:
+  - host: sso.${local_ingress_domain}
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: keycloak-service
+            port:
+              name: http
