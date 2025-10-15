@@ -32,10 +32,10 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: user
+  - secretKey: username
     remoteRef:
       key: "keycloak-credentials"
-      property: user
+      property: username
   - secretKey: password
     remoteRef:
       key: "keycloak-credentials"
