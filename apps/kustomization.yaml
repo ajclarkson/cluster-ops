@@ -11,4 +11,3 @@ resources:
 - minio.yaml
 - loki.yaml
 - k8s-monitoring.yaml
-- keycloak.yaml
