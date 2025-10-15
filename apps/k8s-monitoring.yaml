@@ -31,6 +31,14 @@ spec:
         type: loki
         url: http://loki-gateway.loki/loki/api/v1/push
 
+
+    clusterEvents:
+      enabled: true
+      collector: alloy-logs
+
+    nodeLogs:
+      enabled: true
+
     podLogs:
       enabled: true
       destinations:
