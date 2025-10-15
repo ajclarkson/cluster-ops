@@ -6,3 +6,4 @@ resources:
 - ingress-nginx.yaml
 - external-secrets.yaml
 - longhorn.yaml
+- cloudnative-pg.yaml
