@@ -1,0 +1,104 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: keycloak-db-credentials
+  namespace: keycloak
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: username
+    remoteRef:
+      key: "keycloak-db-credentials"
+      property: username
+  - secretKey: password
+    remoteRef:
+      key: "keycloak-db-credentials"
+      property: password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: keycloak-credentials
+  namespace: keycloak
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: user
+    remoteRef:
+      key: "keycloak-credentials"
+      property: user
+  - secretKey: password
+    remoteRef:
+      key: "keycloak-credentials"
+      property: password
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: keycloak-db
+  namespace: keycloak
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.6
+  storage:
+    size: 1Gi
+  monitoring:
+    enablePodMonitor: false
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: keycloak
+      secret:
+        name: keycloak-db-credentials
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  # Number of instances in the cluster
+  instances: 2
+  # External Database connection
+  db:
+    vendor: postgres
+    host: keycloak-db-rw
+    port: 5432
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db-credentials
+      key: username
+    passwordSecret:
+      name: keycloak-db-credentials
+      key: password
+  # Bootstrap admin account
+  bootstrapAdmin:
+    user:
+      secret: keycloak-credentials
+  # Enabling HTTP communications
+  # Keycloak behing HTTP Proxy closing TLS connections
+  http:
+    httpEnabled: true
+  hostname:
+    # Setting hostname
+    hostname: https://sso.${local_ingress_domain}
+    strict: true
+    # Enabling back channel
+    backchannelDynamic: true
+  proxy:
+    headers: xforwarded # double check your reverse proxy sets and overwrites the X-Forwarded-* headers
+  # Do not create ingress
+  # TLS options are not supported. Ingress resource to be created separatedly.
+  ingress:
+    enabled: false
+  # Additional Options  
+  additionalOptions: []
