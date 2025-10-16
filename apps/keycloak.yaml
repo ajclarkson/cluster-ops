@@ -45,7 +45,7 @@ apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: oauth2-proxy-credentials
-  namespace: oauth2-proxy
+  namespace: keycloak
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -160,6 +160,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: oauth2-proxy
+  namespace: keycloak
 spec:
   values:  
     config:
