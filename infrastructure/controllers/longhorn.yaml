@@ -30,4 +30,7 @@ spec:
       ingressClassName: nginx
       tls: true
       host: longhorn.local.clarksons.me
+      annotations:
+        nginx.ingress.kubernetes.io/auth-signin: "${oauth_signin_url}"
+        nginx.ingress.kubernetes.io/auth-url: "${oauth_url}"
 
