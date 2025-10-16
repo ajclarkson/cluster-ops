@@ -70,13 +70,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: zigbee2mqtt
+  name: zigbee2mqtt-test-ingress
   namespace: zigbee2mqtt
   annotations:
     nginx.org/websocket-services: zigbee2mqtt 
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2.local.clarksons.me/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url: http://oauth2-proxy.keycloak.svc.cluster.local/oauth2/auth
 spec:
   tls:
     - hosts:
