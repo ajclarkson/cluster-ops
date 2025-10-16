@@ -41,6 +41,35 @@ spec:
       key: "keycloak-credentials"
       property: password
 ---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: oauth2-proxy-credentials
+  namespace: oauth2-proxy
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: client-id
+    remoteRef:
+      key: "oauth2-proxy-credentials"
+      property: client-id
+  - secretKey: client-secret
+    remoteRef:
+      key: "oauth2-proxy-credentials"
+      property: client-secret
+  - secretKey: cookie-secret
+    remoteRef:
+      key: "oauth2-proxy-credentials"
+      property: cookie-secret
+  - secretKey: redis-password
+    remoteRef:
+      key: "oauth2-proxy-credentials"
+      property: redis-password
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -126,3 +155,78 @@ spec:
             name: keycloak-service
             port:
               name: http
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: oauth2-proxy
+spec:
+  values:  
+    config:
+      existingSecret: "oauth2-proxy-credentials"
+        
+      cookieName: "oauth2-proxy"
+        # Config file
+      configFile: |-
+        # Provider config
+        provider="keycloak-oidc"
+        provider_display_name="Keycloak"
+        redirect_url="https://oauth2.local.clarksons.me/oauth2/callback"
+        oidc_issuer_url="https://sso.local.clarksons.me/realms/rackman"
+        code_challenge_method="S256"
+        ssl_insecure_skip_verify=true
+        # Upstream config
+        http_address="0.0.0.0:4180"
+        upstreams="file:///dev/null"
+        email_domains=["*"]
+        cookie_domains=["clarksons.me"]
+        cookie_secure=false
+        scope="openid"
+        whitelist_domains=["*.clarksons.me"]
+        insecure_oidc_allow_unverified_email="true"
+        silence_ping_logging=true
+        request_logging=true
+        standard_logging=true
+        reverse_proxy=true
+        set_xauthrequest=true
+
+    sessionStorage:
+      type: redis
+      redis:
+        existingSecret: oauth2-proxy-credentials
+        passwordKey: redis-password
+
+    redis:
+      enabled: true
+      architecture: standalone
+      auth:
+        existingSecret: oauth2-proxy-credentials
+        existingSecretPasswordKey: redis-password
+
+    ingress:
+      enabled: true
+      className: "nginx"
+      pathType: Prefix
+      path: /oauth2
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+      hosts:
+        - oauth2.local.clarksons.me
+      tls:
+        - hosts:
+            - oauth2.local.clarksons.me
+
+  interval: 15m
+  timeout: 5m
+  releaseName: oauth2-proxy
+  targetNamespace: oauth2-proxy
+
+  chart:
+    spec:
+      chart: oauth2-proxy
+      version: '7.18.0'
+      sourceRef:
+        kind: HelmRepository
+        name: oauth2-proxy
+        namespace: flux-system
+
