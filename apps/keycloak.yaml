@@ -220,7 +220,7 @@ spec:
   interval: 15m
   timeout: 5m
   releaseName: oauth2-proxy
-  targetNamespace: oauth2-proxy
+  targetNamespace: keycloak
 
   chart:
     spec:
