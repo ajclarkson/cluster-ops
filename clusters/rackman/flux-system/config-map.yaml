@@ -12,3 +12,5 @@ data:
   sonos_advertise_ip: 10.0.0.33 
   onepassword_vault_name: "rackman"
   external_vip: 10.0.0.50
+  oauth_signin_url: "https://oauth2.local.clarksons.me/oauth2/start"
+  oauth_url: "http://oauth2-proxy.keycloak.svc.cluster.local/oauth2/auth"
