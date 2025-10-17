@@ -12,3 +12,4 @@ resources:
 - loki.yaml
 - k8s-monitoring.yaml
 - keycloak.yaml
+- node-red-dupe.yaml
