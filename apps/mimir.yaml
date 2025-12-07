@@ -35,7 +35,7 @@ metadata:
 spec:
   chart:
     spec:
-      chart: mimir
+      chart: mimir-distributed
       version: "5.70.0"
       sourceRef:
         kind: HelmRepository
