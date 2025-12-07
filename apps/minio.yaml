@@ -127,6 +127,11 @@ spec:
         existingSecretKey: password
         policy: readwrite
 
+      - accessKey: mimir.user
+        existingSecret: minio-mimir-credentials
+        existingSecretKey: password
+        policy: readwrite
+
     buckets:
       - name: loki-ruler
       - name: loki-chunks
