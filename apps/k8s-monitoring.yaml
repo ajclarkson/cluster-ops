@@ -29,7 +29,7 @@ spec:
     destinations:
       - name: mimir
         type: prometheus
-        url: http://mimir-nginx.monitoring.svc/api/v1/push
+        url: http://mimir-nginx.mimir.svc/api/v1/push
 
       - name: loki
         type: loki
