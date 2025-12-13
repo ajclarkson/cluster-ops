@@ -116,8 +116,8 @@ spec:
       enabled: false
     metaMonitoring:
       dashboards:
-        enabled: true
+        enabled: false
         annotations:
           grafana_folder: "Mimir"
       serviceMonitor:
-        enabled: true
+        enabled: false
