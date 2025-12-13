@@ -39,7 +39,7 @@ spec:
       enabled: true
       destinations:
         - mimir
-        
+
     prometheusOperatorObjects:
       enabled: true
       destinations:
@@ -60,7 +60,7 @@ spec:
         - loki
 
     alloy-metrics:
-      enabled: false
+      enabled: true
 
     alloy-logs: 
       enabled: true
