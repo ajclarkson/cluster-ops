@@ -74,6 +74,7 @@ spec:
             access_key_id: ${MINIO_SECRET_ACCESS_KEY}
             secret_access_key: ${MINIO_ACCESS_KEY_ID}
             bucket_name: "mimir"
+            insecure: true
         compactor:
           compaction_interval: 2h
         query_scheduler:
