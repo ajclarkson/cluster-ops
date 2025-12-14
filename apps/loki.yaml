@@ -85,7 +85,6 @@ spec:
               period: 9600h # 400 days
 
         compactor:
-          shared_store: s3
           working_directory: /var/loki/compactor
           compaction_interval: 10m
           retention_enabled: true
