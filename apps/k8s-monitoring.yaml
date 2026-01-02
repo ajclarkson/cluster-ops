@@ -30,7 +30,6 @@ spec:
       - name: mimir
         type: prometheus
         url: http://mimir-nginx.mimir.svc/api/v1/push
-
       - name: loki
         type: loki
         url: http://loki-gateway.loki/loki/api/v1/push
@@ -46,6 +45,13 @@ spec:
         - mimir
       crds:
         deploy: true
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 500m
 
     clusterEvents:
       enabled: true
@@ -53,6 +59,8 @@ spec:
 
     nodeLogs:
       enabled: true
+      destinations:
+        - loki
 
     podLogs:
       enabled: true
@@ -61,8 +69,26 @@ spec:
 
     alloy-metrics:
       enabled: true
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 250m
 
-    alloy-logs: 
+    alloy-logs:
       enabled: true
       nodeSelector:
         logging: "true"
+      # Keep Alloy-Logs running per node for full log coverage
+
+    prometheus:
+      replicas: 1
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 250m
+        limits:
+          memory: 512Mi
+          cpu: 500m
