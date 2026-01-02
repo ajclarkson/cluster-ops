@@ -1,4 +1,10 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloak
+---
+# Database Credentials
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -11,15 +17,16 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: username
-    remoteRef:
-      key: "keycloak-db-credentials"
-      property: username
-  - secretKey: password
-    remoteRef:
-      key: "keycloak-db-credentials"
-      property: password
+    - secretKey: username
+      remoteRef:
+        key: "keycloak-db-credentials"
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: "keycloak-db-credentials"
+        property: password
 ---
+# Keycloak Admin Credentials
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -32,15 +39,16 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: username
-    remoteRef:
-      key: "keycloak-credentials"
-      property: username
-  - secretKey: password
-    remoteRef:
-      key: "keycloak-credentials"
-      property: password
+    - secretKey: username
+      remoteRef:
+        key: "keycloak-credentials"
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: "keycloak-credentials"
+        property: password
 ---
+# OAuth2-Proxy Credentials
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -53,33 +61,41 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: client-id
-    remoteRef:
-      key: "oauth2-proxy-credentials"
-      property: client-id
-  - secretKey: client-secret
-    remoteRef:
-      key: "oauth2-proxy-credentials"
-      property: client-secret
-  - secretKey: cookie-secret
-    remoteRef:
-      key: "oauth2-proxy-credentials"
-      property: cookie-secret
-  - secretKey: redis-password
-    remoteRef:
-      key: "oauth2-proxy-credentials"
-      property: redis-password
+    - secretKey: client-id
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: client-id
+    - secretKey: client-secret
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: client-secret
+    - secretKey: cookie-secret
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: cookie-secret
+    - secretKey: redis-password
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: redis-password
 ---
+# PostgreSQL DB (single instance)
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: keycloak-db
   namespace: keycloak
 spec:
-  instances: 3
+  instances: 1
   imageName: ghcr.io/cloudnative-pg/postgresql:17.6
   storage:
     size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 300m
   monitoring:
     enablePodMonitor: false
   bootstrap:
@@ -89,18 +105,17 @@ spec:
       secret:
         name: keycloak-db-credentials
 ---
+# Keycloak (single instance)
 apiVersion: k8s.keycloak.org/v2alpha1
 kind: Keycloak
 metadata:
   name: keycloak
   namespace: keycloak
 spec:
-  # Number of instances in the cluster
-  instances: 2
-  # External Database connection
+  instances: 1
   db:
     vendor: postgres
-    host: keycloak-db-rw
+    host: keycloak-db
     port: 5432
     database: keycloak
     usernameSecret:
@@ -109,29 +124,31 @@ spec:
     passwordSecret:
       name: keycloak-db-credentials
       key: password
-  # Bootstrap admin account
   bootstrapAdmin:
     user:
       secret: keycloak-credentials
-  # Enabling HTTP communications
-  # Keycloak behing HTTP Proxy closing TLS connections
   http:
     httpEnabled: true
   hostname:
-    # Setting hostname
     hostname: https://sso.${local_ingress_domain}
     strict: true
-    # Enabling back channel
-    backchannelDynamic: true
   proxy:
-    headers: xforwarded # double check your reverse proxy sets and overwrites the X-Forwarded-* headers
-  # Do not create ingress
-  # TLS options are not supported. Ingress resource to be created separatedly.
+    headers: xforwarded
   ingress:
     enabled: false
-  # Additional Options  
-  additionalOptions: []
+  additionalOptions:
+    - "-Djboss.bind.address=0.0.0.0"
+    - "-Xms256m"
+    - "-Xmx512m"
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
 ---
+# Ingress for Keycloak
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -143,40 +160,47 @@ spec:
   tls:
     - hosts:
         - sso.${local_ingress_domain}
-         
   ingressClassName: nginx
   rules:
-  - host: sso.${local_ingress_domain}
-    http:
-      paths:
-      - pathType: ImplementationSpecific
-        backend:
-          service:
-            name: keycloak-service
-            port:
-              name: http
+    - host: sso.${local_ingress_domain}
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak-service
+                port:
+                  name: http
 ---
+# OAuth2-Proxy
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: oauth2-proxy
   namespace: keycloak
 spec:
-  values:  
+  chart:
+    spec:
+      chart: oauth2-proxy
+      version: '8.5.1'
+      sourceRef:
+        kind: HelmRepository
+        name: oauth2-proxy
+        namespace: flux-system
+  releaseName: oauth2-proxy
+  targetNamespace: keycloak
+  interval: 15m
+  timeout: 5m
+  values:
     config:
       existingSecret: "oauth2-proxy-credentials"
-        
       cookieName: "oauth2-proxy"
-        # Config file
       configFile: |-
-        # Provider config
         provider="keycloak-oidc"
         provider_display_name="Keycloak"
         redirect_url="https://oauth2.local.clarksons.me/oauth2/callback"
         oidc_issuer_url="https://sso.local.clarksons.me/realms/rackman"
         code_challenge_method="S256"
-        ssl_insecure_skip_verify=true
-        # Upstream config
         http_address="0.0.0.0:4180"
         upstreams="file:///dev/null"
         email_domains=["*"]
@@ -190,39 +214,31 @@ spec:
         standard_logging=true
         reverse_proxy=true
         set_xauthrequest=true
-
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 50m
+      limits:
+        memory: 128Mi
+        cpu: 200m
     sessionStorage:
       type: redis
       redis:
         clientType: "standalone"
         password: "foo"
-
-    # provision an instance of the redis-ha sub-chart
     redis:
       enabled: true
-
-      redisPassword: "foo"
-
       replicas: 1
-
-      # Remove sentinel overhead, speed up startup and redis itself
-      sentinel:
-        livenessProbe:
-          enabled: false
-        readinessProbe:
-          enabled: false
-        startupProbe:
-          enabled: false
-        quorum: 1
-
+      persistentVolume:
+        enabled: false
+      emptyDir: {}
       hardAntiAffinity: false
-
+      redisPassword: "foo"
       redis:
         config:
           min-replicas-to-write: 0
           save: ""
           appendonly: "no"
-
         terminationGracePeriodSeconds: 10
         livenessProbe:
           initialDelaySeconds: 5
@@ -239,24 +255,15 @@ spec:
           periodSeconds: 2
           timeoutSeconds: 3
           failureThreshold: 10
-      splitBrainDetection:
-        interval: 60
-      persistentVolume:
-        enabled: false
-      emptyDir: {}
       haproxy:
         enabled: false
       exporter:
         enabled: false
       sysctlImage:
         enabled: false
-      hostPath:
-        chown: false
-
     initContainers:
       waitForRedis:
         enabled: true
-
     ingress:
       enabled: true
       className: "nginx"
@@ -269,18 +276,3 @@ spec:
       tls:
         - hosts:
             - oauth2.local.clarksons.me
-
-  interval: 15m
-  timeout: 5m
-  releaseName: oauth2-proxy
-  targetNamespace: keycloak
-
-  chart:
-    spec:
-      chart: oauth2-proxy
-      version: '8.5.1'
-      sourceRef:
-        kind: HelmRepository
-        name: oauth2-proxy
-        namespace: flux-system
-
