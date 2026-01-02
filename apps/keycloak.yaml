@@ -139,9 +139,9 @@ spec:
   additionalOptions: []
   resources:
     requests:
-      memory: 256Mi
+      memory: 1Gi
     limits:
-      memory: 512Mi
+      memory: 1Gi
 ---
 # Ingress for Keycloak
 apiVersion: networking.k8s.io/v1
