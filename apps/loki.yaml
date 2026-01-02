@@ -97,6 +97,11 @@ spec:
       extraEnvFrom:
         - secretRef:
             name: minio-loki-credentials
+      resources:
+        requests:
+          memory: 256Mi
+        limits:
+          memory: 512Mi
 
     read:
       replicas: 1
@@ -107,6 +112,11 @@ spec:
       extraEnvFrom:
         - secretRef:
             name: minio-loki-credentials
+      resources:
+        requests:
+          memory: 256Mi
+        limits:
+          memory: 512Mi
 
     backend:
       replicas: 1
@@ -117,6 +127,11 @@ spec:
       extraEnvFrom:
         - secretRef:
             name: minio-loki-credentials
+      resources:
+        requests:
+          memory: 256Mi
+        limits:
+          memory: 512Mi
 
     gateway:
       enabled: true
