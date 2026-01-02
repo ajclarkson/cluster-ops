@@ -48,6 +48,36 @@ spec:
         key: "keycloak-credentials"
         property: password
 ---
+# OAuth2-Proxy Credentials
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: oauth2-proxy-credentials
+  namespace: keycloak
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: client-id
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: client-id
+    - secretKey: client-secret
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: client-secret
+    - secretKey: cookie-secret
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: cookie-secret
+    - secretKey: redis-password
+      remoteRef:
+        key: "oauth2-proxy-credentials"
+        property: redis-password
+---
 # PostgreSQL DB (single instance)
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
