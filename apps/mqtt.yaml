@@ -93,6 +93,11 @@ spec:
               name: config
             - mountPath: /mosquitto/data/
               name: data
+          resources:
+            requests:
+              memory: "200M"
+            limits:
+              memory: "200M"
       volumes:
         - name: config
           configMap:
