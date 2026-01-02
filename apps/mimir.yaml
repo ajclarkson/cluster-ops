@@ -71,7 +71,7 @@ spec:
           compactor_blocks_retention_period: 24h
 
     ingester:
-      replicas: 1
+      replicas: 2
       persistentVolume:
         enabled: true
         accessModes:
