@@ -7,7 +7,7 @@ metadata:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: minio-mimir-credentials 
+  name: minio-mimir-credentials
   namespace: mimir
 spec:
   secretStoreRef:
@@ -16,14 +16,14 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: MINIO_ACCESS_KEY_ID
-    remoteRef:
-      key: "minio-mimir-credentials"
-      property: username
-  - secretKey: MINIO_SECRET_ACCESS_KEY
-    remoteRef:
-      key: "minio-mimir-credentials"
-      property: password
+    - secretKey: MINIO_ACCESS_KEY_ID
+      remoteRef:
+        key: "minio-mimir-credentials"
+        property: username
+    - secretKey: MINIO_SECRET_ACCESS_KEY
+      remoteRef:
+        key: "minio-mimir-credentials"
+        property: password
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -31,7 +31,7 @@ metadata:
   name: mimir
   namespace: mimir
   annotations:
-    kustomize.toolkit.fluxcd.io/substitute: disabled # this is required to prevent flux overwriting the env variable strings
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 spec:
   chart:
     spec:
@@ -50,23 +50,9 @@ spec:
       extraEnvFrom:
         - secretRef:
             name: minio-mimir-credentials
+
     mimir:
       structuredConfig:
-        memberlist:
-          cluster_label: "mimir"
-          cluster_label_verification_disabled: false
-        server:
-          log_level: info
-          grpc_server_max_recv_msg_size: 104857600
-          grpc_server_max_send_msg_size: 104857600
-          grpc_server_max_concurrent_streams: 1000
-        limits:
-          max_label_names_per_series: 120
-          max_global_series_per_user: 12000000
-          ingestion_burst_size: 200000
-          ingestion_rate: 150000
-          max_global_series_per_metric: 200000000
-          compactor_blocks_retention_period: 24h
         blocks_storage:
           backend: s3
           s3:
@@ -77,39 +63,81 @@ spec:
             insecure: true
         compactor:
           compaction_interval: 2h
-        query_scheduler:
-          max_outstanding_requests_per_tenant: 10000
+        limits:
+          ingestion_rate: 100000
+          ingestion_burst_size: 100000
+          max_label_names_per_series: 120
+          max_global_series_per_user: 1000000
+          compactor_blocks_retention_period: 24h
+
     ingester:
-      zoneAwareReplication:
-        enabled: false
+      replicas: 1
       persistentVolume:
         enabled: true
         accessModes:
           - ReadWriteOnce
         size: 5Gi
-      replicas: 2
-    distributor:
-      extraArgs:
-        auth.multitenancy-enabled: false
-        log.level: info
-      replicas: 1
-    compactor:
-      replicas: 1
-    querier:
-      replicas: 2
-    query_frontend:
-      replicas: 1
-    query_scheduler:
-      replicas: 1
-    store_gateway:
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 200m
+        limits:
+          memory: 512Mi
+          cpu: 400m
       zoneAwareReplication:
         enabled: false
+
+    distributor:
       replicas: 1
-    rollout_operator:
-      enabled: false
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 200m
+        limits:
+          memory: 512Mi
+          cpu: 400m
+
+    compactor:
+      replicas: 1
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 200m
+        limits:
+          memory: 512Mi
+          cpu: 400m
+
+    querier:
+      replicas: 1
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 200m
+        limits:
+          memory: 512Mi
+          cpu: 400m
+
+    query_frontend:
+      replicas: 1
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 250m
+
+    store_gateway:
+      replicas: 1
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 250m
+
     ruler:
-      enabled: false
-    overrides_exporter:
       enabled: false
     alertmanager:
       enabled: false
@@ -118,7 +146,5 @@ spec:
     metaMonitoring:
       dashboards:
         enabled: false
-        annotations:
-          grafana_folder: "Mimir"
       serviceMonitor:
         enabled: false
