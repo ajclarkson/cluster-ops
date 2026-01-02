@@ -71,10 +71,10 @@ spec:
       enabled: true
       resources:
         requests:
-          memory: 128Mi
+          memory: 500Mi
           cpu: 100m
         limits:
-          memory: 256Mi
+          memory: 1Gi
           cpu: 250m
 
     alloy-logs:
