@@ -84,6 +84,10 @@ spec:
 
     # Set replication to 1 to simplify and reduce resource usage
     deploymentMode: SimpleScalable
+
+    compactor:
+      enabled: true
+
     write:
       replicas: 1
       persistence:
