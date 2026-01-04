@@ -92,23 +92,3 @@ spec:
         limits:
           memory: 512Mi
           cpu: 500m
-
-  postBuild:
-    patches:
-      - target:
-          kind: Alloy
-          name: k8s-monitoring-alloy-metrics
-          namespace: k8s-monitoring
-        patch: |
-          apiVersion: monitoring.grafana.com/v1alpha1
-          kind: Alloy
-          metadata:
-            name: k8s-monitoring-alloy-metrics
-            namespace: k8s-monitoring
-          spec:
-            resources:
-              requests:
-                cpu: 100m
-                memory: 256Mi
-              limits:
-                memory: 512Mi
