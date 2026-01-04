@@ -12,3 +12,6 @@ resources:
 - k8s-monitoring.yaml
 - keycloak.yaml
 - mimir.yaml
+
+patchesStrategicMerge:
+- k8s-monitoring-alloy-metrics-patch.yaml
