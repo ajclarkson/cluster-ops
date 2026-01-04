@@ -46,6 +46,27 @@ spec:
       key: "minio-loki-credentials"
       property: password
 ---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: minio-mimir-credentials
+  namespace: minio
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: MINIO_ACCESS_KEY_ID
+      remoteRef:
+        key: "minio-mimir-credentials"
+        property: username
+    - secretKey: MINIO_SECRET_ACCESS_KEY
+      remoteRef:
+        key: "minio-mimir-credentials"
+        property: password
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
