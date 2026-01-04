@@ -58,11 +58,11 @@ spec:
   target:
     creationPolicy: Owner
   data:
-    - secretKey: MINIO_ACCESS_KEY_ID
+    - secretKey: user
       remoteRef:
         key: "minio-mimir-credentials"
         property: username
-    - secretKey: MINIO_SECRET_ACCESS_KEY
+    - secretKey: password
       remoteRef:
         key: "minio-mimir-credentials"
         property: password
