@@ -1,13 +1,13 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: monitoring.grafana.com/v1alpha1
+kind: Alloy
 metadata:
-  name: k8s-monitoring-alloy-metrics
+  name: alloy-metrics
   namespace: k8s-monitoring
 spec:
   template:
     spec:
       containers:
-        - name: k8s-monitoring-alloy-metrics # Must match the container name in your base manifest
+        - name: alloy-metrics # Must match the container name in your base manifest
           resources:
             limits:
               memory: "512Mi" # The new memory limit
