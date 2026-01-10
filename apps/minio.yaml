@@ -7,7 +7,7 @@ metadata:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: minio-root-credentials 
+  name: minio-root-credentials
   namespace: minio
 spec:
   secretStoreRef:
@@ -28,7 +28,7 @@ spec:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: minio-loki-credentials 
+  name: minio-loki-credentials
   namespace: minio
 spec:
   secretStoreRef:
@@ -59,100 +59,5 @@ spec:
     creationPolicy: Owner
   data:
     - secretKey: user
-      remoteRef:
-        key: "minio-mimir-credentials"
-        property: username
-    - secretKey: password
-      remoteRef:
-        key: "minio-mimir-credentials"
-        property: password
----
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: minio
-  namespace: minio
-spec:
-  chart:
-    spec:
-      chart: minio
-      version: "5.4.0"
-      sourceRef:
-        kind: HelmRepository
-        name: minio
-        namespace: flux-system
-  interval: 15m
-  timeout: 5m
-  releaseName: minio
-  targetNamespace: minio
-  values:
-    clusterDomain: cluster.local
+      remot
 
-    mode: standalone
-
-    ## Port number for MinIO S3 API Access
-    minioAPIPort: "9000"
-
-    ## Port number for MinIO Browser COnsole Access
-    minioConsolePort: "9001"
-
-    persistence:
-      enabled: true
-      annotations: {}
-      accessMode: ReadWriteOnce
-      size: 25Gi
-
-    service:
-      type: ClusterIP
-      clusterIP: ~
-      ## Make sure to match it to minioAPIPort
-      port: "9000"
-      nodePort: 32000
-
-    ingress:
-      enabled: false
-      
-    consoleService:
-      type: ClusterIP
-      clusterIP: ~
-      ## Make sure to match it to minioConsolePort
-      port: "9001"
-      nodePort: 32001
-
-    consoleIngress:
-      enabled: true
-      ingressClassName: "nginx"
-      labels: {}
-
-      annotations: {}
-      path: /
-      hosts:
-        - minio.${local_ingress_domain}
-      tls:
-        - hosts:
-            - minio.${local_ingress_domain}
-
-    
-    resources:
-      requests:
-        memory: 1Gi
-
-    users:
-      - accessKey: consoleadmin
-        existingSecret: minio-root-credentials
-        existingSecretKey: password
-        policy: consoleAdmin
-
-      - accessKey: loki.user
-        existingSecret: minio-loki-credentials
-        existingSecretKey: password
-        policy: readwrite
-
-      - accessKey: mimir.user
-        existingSecret: minio-mimir-credentials
-        existingSecretKey: password
-        policy: readwrite
-
-    buckets:
-      - name: loki-ruler
-      - name: loki-chunks
