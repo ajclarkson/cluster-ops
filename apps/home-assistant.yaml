@@ -47,7 +47,7 @@ metadata:
   annotations:
 spec:
   type: LoadBalancer
-  loadBalancerIP: "${sonos_advertise_ip}" 
+  loadBalancerIP: "${sonos_advertise_ip}"
   ports:
   - port: 1400
     targetPort: 1400
@@ -68,7 +68,7 @@ spec:
   tls:
     - hosts:
         - home.${local_ingress_domain}
-         
+
   ingressClassName: nginx
   rules:
   - host: home.${local_ingress_domain}
@@ -109,6 +109,19 @@ spec:
       automountServiceAccountToken: true
       enableServiceLinks: true
       hostNetwork: true
+
+      # Prefer not to schedule Home Assistant on the observability node(s)
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: workload
+                    operator: NotIn
+                    values:
+                      - observability
+
       containers:
         - name: home-assistant
           image: "ghcr.io/home-assistant/home-assistant:2025.12.5"
@@ -155,3 +168,4 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: home-assistant-config
+
