@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mqtt-events-bridge
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-events-bridge
+  namespace: mqtt-events-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-events-bridge
+  template:
+    metadata:
+      labels:
+        app: mqtt-events-bridge
+    spec:
+      containers:
+        - name: mosquitto-sub
+          image: eclipse-mosquitto:2.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              echo "Starting mqtt-events-bridge...";
+              while true; do
+                mosquitto_sub \
+                  -h mqtt-mosquitto.mqtt.svc.cluster.local \
+                  -p 1883 \
+                  -t 'home/events' \
+                  -q 0 \
+                  -R ;
+                echo "mosquitto_sub exited; restarting in 2s..." >&2
+                sleep 2
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+
