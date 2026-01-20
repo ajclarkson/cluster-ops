@@ -12,4 +12,3 @@ resources:
 - k8s-monitoring.yaml
 - keycloak.yaml
 - mimir.yaml
-- fluent-bit.yaml
