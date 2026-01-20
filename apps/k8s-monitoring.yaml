@@ -133,6 +133,7 @@ spec:
               subsystem   = "subsystem",
               location    = "location",
               event_type  = "event_type",
+              outputs_result = "outputs.result",
               correlation = "correlation_id",
               decision    = "decision",
               reason      = "reason",
@@ -146,6 +147,7 @@ spec:
               subsystem  = "subsystem",
               location   = "location",
               event_type = "event_type",
+              outputs_result = "outputs_result"
             }
           }
 
