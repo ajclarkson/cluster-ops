@@ -98,11 +98,6 @@ spec:
       nodeSelector:
         logging: "true"
 
-    alloy-logs:
-      enabled: true
-      nodeSelector:
-        logging: "true"
-
       # Append extra River config to the generated Alloy config
       extraConfig: |-
         // --- HOME EVENTS PIPELINE (ONLY mqtt-events-bridge pods) ---
