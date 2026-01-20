@@ -152,7 +152,7 @@ spec:
           // Optional: keep correlation_id as *field*, not label (useful but can be high-cardinality)
           // stage.structured_metadata { values = { correlation_id = "correlation" } }
 
-          forward_to = [loki.write.default.receiver]
+          forward_to = [loki.write.loki.receiver]
         }
 
 
