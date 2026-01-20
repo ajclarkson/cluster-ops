@@ -98,6 +98,69 @@ spec:
       nodeSelector:
         logging: "true"
 
+    alloy-logs:
+      enabled: true
+      nodeSelector:
+        logging: "true"
+
+      # Append extra River config to the generated Alloy config
+      extraConfig: |-
+        // --- HOME EVENTS PIPELINE (ONLY mqtt-events-bridge pods) ---
+
+        discovery.kubernetes "home_events_pods" {
+          role = "pod"
+          selectors {
+            role  = "pod"
+            label = "app=mqtt-events-bridge"
+          }
+        }
+
+        discovery.relabel "home_events_keep" {
+          targets = discovery.kubernetes.home_events_pods.targets
+
+          // Keep only containers that actually have logs
+          rule {
+            action = "keep"
+            source_labels = ["__meta_kubernetes_pod_label_app"]
+            regex = "mqtt-events-bridge"
+          }
+        }
+
+        loki.source.kubernetes "home_events" {
+          targets    = discovery.relabel.home_events_keep.output
+          forward_to = [loki.process.home_events.receiver]
+        }
+
+        loki.process "home_events" {
+          // Parse JSON event body into extracted fields
+          stage.json {
+            expressions = {
+              subsystem   = "subsystem",
+              location    = "location",
+              event_type  = "event_type",
+              correlation = "correlation_id",
+              decision    = "decision",
+              reason      = "reason",
+            }
+          }
+
+          // Promote only stable, bounded-cardinality fields as LABELS
+          stage.labels {
+            values = {
+              stream     = "home_events",
+              subsystem  = "subsystem",
+              location   = "location",
+              event_type = "event_type",
+            }
+          }
+
+          // Optional: keep correlation_id as *field*, not label (useful but can be high-cardinality)
+          // stage.structured_metadata { values = { correlation_id = "correlation" } }
+
+          forward_to = [loki.write.default.receiver]
+        }
+
+
     prometheus:
       replicas: 1
       resources:
