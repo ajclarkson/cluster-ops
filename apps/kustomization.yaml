@@ -12,3 +12,4 @@ resources:
 - k8s-monitoring.yaml
 - keycloak.yaml
 - mimir.yaml
+- vector.yaml
