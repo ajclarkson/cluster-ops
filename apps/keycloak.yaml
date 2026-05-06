@@ -209,6 +209,7 @@ spec:
         standard_logging=true
         reverse_proxy=true
         set_xauthrequest=true
+        skip_jwt_bearer_tokens=true
     resources:
       requests:
         memory: 64Mi
