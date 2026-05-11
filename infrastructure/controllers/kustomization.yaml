@@ -8,3 +8,4 @@ resources:
 - longhorn.yaml
 - cloudnative-pg.yaml
 - keycloak-operator/
+- system-upgrade.yaml
