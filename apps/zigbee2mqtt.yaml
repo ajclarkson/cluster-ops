@@ -99,7 +99,7 @@ spec:
       enableServiceLinks: true
       containers:
         - name: zigbee2mqtt
-          image: "koenkk/zigbee2mqtt:2.7.2"
+          image: "koenkk/zigbee2mqtt:2.10.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
