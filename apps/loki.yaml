@@ -83,6 +83,7 @@ spec:
       compactor:
         retention_enabled: true
         delete_request_store: s3
+        working_directory: /tmp/loki-compactor
 
     # Set replication to 1 to simplify and reduce resource usage
     deploymentMode: SimpleScalable
