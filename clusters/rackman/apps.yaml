@@ -8,6 +8,7 @@ spec:
   dependsOn: 
     - name: infra-configs
   path: ./apps
+  force: true
   prune: true
   sourceRef:
     kind: GitRepository
