@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: k8s-monitoring
-      version: "3.8.7"
+      version: "4.1.1"
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -24,21 +24,117 @@ spec:
   targetNamespace: k8s-monitoring
 
   values:
-    cluster:
-      name: k8s-monitoring
-
     destinations:
-      - name: mimir
+      mimir:
         type: prometheus
         url: http://mimir-nginx.mimir.svc/api/v1/push
-      - name: loki
+      loki:
         type: loki
         url: http://loki-gateway.loki/loki/api/v1/push
+
+    collectors:
+      alloy-metrics:
+        presets:
+          - clustered
+          - statefulset
+        alloy:
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 500Mi
+              cpu: 250m
+        controller:
+          nodeSelector:
+            workload: observability
+
+      alloy-logs:
+        presets:
+          - filesystem-log-reader
+          - daemonset
+        nodeSelector:
+          logging: 'true'
+        alloy:
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 50m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+        
+        # Append extra River config to the generated Alloy config
+        extraConfig: |-
+          // --- HOME EVENTS PIPELINE (ONLY mqtt-events-bridge pods) ---
+
+          discovery.kubernetes "home_events_pods" {
+            role = "pod"
+            selectors {
+              role  = "pod"
+              label = "app=mqtt-events-bridge"
+            }
+          }
+
+          discovery.relabel "home_events_keep" {
+            targets = discovery.kubernetes.home_events_pods.targets
+
+            // Keep only containers that actually have logs
+            rule {
+              action = "keep"
+              source_labels = ["__meta_kubernetes_pod_label_app"]
+              regex = "mqtt-events-bridge"
+            }
+          }
+
+          loki.source.kubernetes "home_events" {
+            targets    = discovery.relabel.home_events_keep.output
+            forward_to = [loki.process.home_events.receiver]
+          }
+
+          loki.process "home_events" {
+            // Parse JSON event body into extracted fields
+            stage.json {
+              expressions = {
+                subsystem   = "subsystem",
+                location    = "location",
+                event_type  = "event_type",
+                outputs_result = "outputs.result",
+                correlation = "correlation_id",
+                decision    = "decision",
+                reason      = "reason",
+              }
+            }
+
+            // Promote only stable, bounded-cardinality fields as LABELS
+            stage.labels {
+              values = {
+                stream     = "home_events",
+                subsystem  = "subsystem",
+                location   = "location",
+                event_type = "event_type",
+                outputs_result = "outputs_result",
+              }
+            }
+
+            // Optional: keep correlation_id as *field*, not label (useful but can be high-cardinality)
+            // stage.structured_metadata { values = { correlation_id = "correlation" } }
+
+            forward_to = [loki.write.loki.receiver]
+          }
 
     clusterMetrics:
       enabled: true
       destinations:
         - mimir
+      collector: alloy-metrics
+
+    telemetryServices:
+      kube-state-metrics:
+        deploy: true
+
+    cluster:
+      name: k8s-monitoring
 
     prometheusOperatorObjects:
       enabled: true
@@ -53,6 +149,7 @@ spec:
         limits:
           memory: 256Mi
           cpu: 500m
+      collector: alloy-metrics
 
     clusterEvents:
       enabled: true
@@ -62,98 +159,13 @@ spec:
       enabled: true
       destinations:
         - loki
+      collector: alloy-logs
 
-    podLogs:
+    podLogsViaLoki:
       enabled: true
       destinations:
         - loki
-
-    alloy-metrics:
-      enabled: true
-      alloy:
-        resources:
-          requests:
-            memory: 256Mi
-            cpu: 100m
-          limits:
-            memory: 500Mi
-            cpu: 250m
-      controller:
-        nodeSelector:
-          workload: observability
-
-    alloy-logs:
-      enabled: true
-      nodeSelector:
-        logging: "true"
-      alloy:
-        resources:
-          requests:
-            memory: 128Mi
-            cpu: 50m
-          limits:
-            memory: 256Mi
-            cpu: 200m
-
-      # Append extra River config to the generated Alloy config
-      extraConfig: |-
-        // --- HOME EVENTS PIPELINE (ONLY mqtt-events-bridge pods) ---
-
-        discovery.kubernetes "home_events_pods" {
-          role = "pod"
-          selectors {
-            role  = "pod"
-            label = "app=mqtt-events-bridge"
-          }
-        }
-
-        discovery.relabel "home_events_keep" {
-          targets = discovery.kubernetes.home_events_pods.targets
-
-          // Keep only containers that actually have logs
-          rule {
-            action = "keep"
-            source_labels = ["__meta_kubernetes_pod_label_app"]
-            regex = "mqtt-events-bridge"
-          }
-        }
-
-        loki.source.kubernetes "home_events" {
-          targets    = discovery.relabel.home_events_keep.output
-          forward_to = [loki.process.home_events.receiver]
-        }
-
-        loki.process "home_events" {
-          // Parse JSON event body into extracted fields
-          stage.json {
-            expressions = {
-              subsystem   = "subsystem",
-              location    = "location",
-              event_type  = "event_type",
-              outputs_result = "outputs.result",
-              correlation = "correlation_id",
-              decision    = "decision",
-              reason      = "reason",
-            }
-          }
-
-          // Promote only stable, bounded-cardinality fields as LABELS
-          stage.labels {
-            values = {
-              stream     = "home_events",
-              subsystem  = "subsystem",
-              location   = "location",
-              event_type = "event_type",
-              outputs_result = "outputs_result",
-            }
-          }
-
-          // Optional: keep correlation_id as *field*, not label (useful but can be high-cardinality)
-          // stage.structured_metadata { values = { correlation_id = "correlation" } }
-
-          forward_to = [loki.write.loki.receiver]
-        }
-
+      collector: alloy-logs
 
     prometheus:
       replicas: 1
