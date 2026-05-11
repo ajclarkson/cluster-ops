@@ -1,4 +1,6 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
   "dependencyDashboard": true,
   "labels": [
     "dependencies"
@@ -27,6 +29,10 @@
       "labels": [
         "patch"
       ]
+    },
+    {
+      "matchPackageNames": ["eclipse-mosquitto"],
+      "groupName": "mosquitto"
     }
   ],
   "rebaseWhen": "behind-base-branch",
@@ -47,7 +53,7 @@
         "/plans.yaml/"
       ],
       "matchStrings": [
-        "(?<currentValue>\\S+)"
+        "version: (?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+\\+k3s[0-9]+)"
       ],
       "depNameTemplate": "k3s",
       "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>\\+k3s)(?<build>\\d+)$",
