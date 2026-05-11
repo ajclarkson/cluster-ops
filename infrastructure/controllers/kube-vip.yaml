@@ -64,8 +64,16 @@ spec:
           - NET_ADMIN
           - NET_RAW
 
-    nodeSelector: 
+    nodeSelector:
       node-role.kubernetes.io/control-plane: "true"
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
