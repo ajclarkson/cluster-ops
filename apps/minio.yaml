@@ -156,6 +156,9 @@ spec:
         - hosts:
             - minio.${local_ingress_domain}
 
+    deploymentUpdate:
+      type: Recreate
+
     resources:
       requests:
         memory: 1Gi
