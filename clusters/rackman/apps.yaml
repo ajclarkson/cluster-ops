@@ -9,7 +9,6 @@ spec:
     - name: infra-configs
   path: ./apps
   prune: true
-  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system
