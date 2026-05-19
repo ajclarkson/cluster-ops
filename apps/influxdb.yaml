@@ -48,6 +48,12 @@ spec:
       enabled: true
       size: 8Gi
 
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
     adminUser:
       user: ajclarkson
       organization: rackman
