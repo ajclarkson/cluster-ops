@@ -186,6 +186,15 @@ spec:
   targetNamespace: keycloak
   interval: 15m
   timeout: 5m
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 1
   values:
     config:
       existingSecret: "oauth2-proxy-credentials"

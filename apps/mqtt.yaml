@@ -69,6 +69,7 @@ metadata:
     app.kubernetes.io/name: mosquitto
     app.kubernetes.io/instance: mqtt
 spec:
+  revisionHistoryLimit: 1
   replicas: 1
   strategy:
     type: Recreate

@@ -45,6 +45,15 @@ spec:
   timeout: 5m
   releaseName: mimir
   targetNamespace: mimir
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 1
   values:
     global:
       extraEnvFrom:

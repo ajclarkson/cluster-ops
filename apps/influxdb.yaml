@@ -43,6 +43,15 @@ spec:
   timeout: 5m
   releaseName: influxdb
   targetNamespace: influxdb
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 1
   values:
     persistence:
       enabled: true

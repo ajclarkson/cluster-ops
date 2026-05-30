@@ -91,6 +91,12 @@ spec:
     - kustomize:
         patches:
           - target:
+              kind: Deployment
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 1
+          - target:
               version: apps/v1
               kind: Deployment
               name: minio

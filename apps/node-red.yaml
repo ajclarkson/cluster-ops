@@ -74,6 +74,7 @@ metadata:
     app.kubernetes.io/instance: node-red
     app.kubernetes.io/name: node-red
 spec:
+  revisionHistoryLimit: 1
   replicas: 1
   strategy:
     type: Recreate

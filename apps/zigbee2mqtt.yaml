@@ -78,7 +78,7 @@ metadata:
     app.kubernetes.io/instance: zigbee2mqtt
     app.kubernetes.io/name: zigbee2mqtt
 spec:
-  revisionHistoryLimit: 3
+  revisionHistoryLimit: 1
   replicas: 1
   strategy:
     type: Recreate
