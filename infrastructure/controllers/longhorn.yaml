@@ -34,16 +34,11 @@ spec:
     persistence:
       reclaimPolicy: Retain
 
-    # Reduce volume replica count for memory savings
     defaultSettings:
-      defaultReplicaCount: 2       # reduce from 3
-      snapshotDataRetention: 5     # keep last 5 snapshots per volume
-      recurringJobs: []            # disable recurring backups by default
-
-    # Optional: disable features that consume extra memory
-      autoSalvage: "true"          # leave enabled for safety
+      defaultReplicaCount: 2
+      autoSalvage: "true"
       allowVolumeCreationWithDegradedAvailability: "false"
-      backupTarget: ""             # optional: set if you have S3/minio
+      backupTarget: ""
 
     # Ingress settings (as before)
     ingress:
