@@ -64,6 +64,8 @@ spec:
       structuredConfig:
         ingest_storage:
           enabled: false
+        ingester:
+          push_grpc_method_enabled: true
         blocks_storage:
           backend: s3
           s3:
