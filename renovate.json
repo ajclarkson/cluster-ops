@@ -1,38 +1,45 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "dependencyDashboard": true,
+  "minimumReleaseAge": "3 days",
   "labels": [
     "dependencies"
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "labels": [
-        "major"
-      ]
+      "matchUpdateTypes": ["major"],
+      "labels": ["major"]
     },
     {
-      "matchUpdateTypes": [
-        "minor"
-      ],
-      "labels": [
-        "minor"
-      ]
+      "matchUpdateTypes": ["minor"],
+      "labels": ["minor"]
     },
     {
-      "matchUpdateTypes": [
-        "patch"
-      ],
-      "labels": [
-        "patch"
-      ]
+      "matchUpdateTypes": ["patch"],
+      "labels": ["patch"]
     },
     {
-      "matchPackageNames": ["eclipse-mosquitto"],
-      "groupName": "mosquitto"
+      "matchPackageNames": [
+        "ghcr.io/home-assistant/home-assistant",
+        "eclipse-mosquitto",
+        "koenkk/zigbee2mqtt",
+        "nodered/node-red"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "home automation",
+      "automerge": false
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "excludePackageNames": [
+        "ghcr.io/home-assistant/home-assistant",
+        "eclipse-mosquitto",
+        "koenkk/zigbee2mqtt",
+        "nodered/node-red"
+      ],
+      "automerge": true,
+      "schedule": ["on weekends"]
     }
   ],
   "rebaseWhen": "behind-base-branch",
