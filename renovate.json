@@ -39,7 +39,7 @@
         "nodered/node-red"
       ],
       "automerge": true,
-      "schedule": ["on weekends"]
+      "schedule": ["every weekend"]
     }
   ],
   "rebaseWhen": "behind-base-branch",
