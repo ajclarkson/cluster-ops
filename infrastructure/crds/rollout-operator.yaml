@@ -90,14 +90,14 @@ spec:
                 type: integer
     subresources:
       status: {}
-    scale:
-      specReplicasPath: .spec.replicas
-      statusReplicasPath: .status.replicas
-      labelSelectorPath: .spec.labelSelector
+      scale:
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
+        labelSelectorPath: .spec.labelSelector
   scope: Namespaced
   names:
     plural: replicatemplates
     singular: replicatemplate
     kind: ReplicaTemplate
-  categories:
-  - all
+    categories:
+    - all
