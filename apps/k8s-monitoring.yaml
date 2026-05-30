@@ -36,7 +36,7 @@ spec:
     destinations:
       mimir:
         type: prometheus
-        url: http://mimir-nginx.mimir.svc/api/v1/push
+        url: http://mimir-gateway.mimir.svc/api/v1/push
       loki:
         type: loki
         url: http://loki-gateway.loki/loki/api/v1/push

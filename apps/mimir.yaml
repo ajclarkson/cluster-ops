@@ -36,7 +36,7 @@ spec:
   chart:
     spec:
       chart: mimir-distributed
-      version: "5.8.0"
+      version: "6.0.6"
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -151,6 +151,10 @@ spec:
     alertmanager:
       enabled: false
     minio:
+      enabled: false
+    kafka:
+      enabled: false
+    ingest_storage:
       enabled: false
     metaMonitoring:
       dashboards:
