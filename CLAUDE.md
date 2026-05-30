@@ -58,6 +58,17 @@ Node memory is shared across all workloads. Before raising any memory limit:
 - High ReplicaSet count (dead 0-replica RSes from Helm upgrades) inflates series — controlled via `revisionHistoryLimit: 1`
 - Loki backend runs the compactor; node-red has 400-day retention which creates a large backlog — backend needs more memory than other Loki components
 
+## GitLab CLI
+
+`glab` is available for MR review and commenting. The token is in `CLAUDE_GITLAB_TOKEN` but glab reads `GITLAB_TOKEN`, so prefix all commands:
+
+```bash
+GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr list
+GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr view <id>
+GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr diff <id>
+GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr note <id> -m "comment"
+```
+
 ## Renovate
 
 Major version bumps are held for manual review — chart schema changes often break values. Before merging a major:
