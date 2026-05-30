@@ -62,6 +62,8 @@ spec:
 
     mimir:
       structuredConfig:
+        ingest_storage:
+          enabled: false
         blocks_storage:
           backend: s3
           s3:
