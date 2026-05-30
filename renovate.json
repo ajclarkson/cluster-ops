@@ -32,14 +32,14 @@
     },
     {
       "matchUpdateTypes": ["patch"],
-      "excludePackageNames": [
-        "ghcr.io/home-assistant/home-assistant",
-        "eclipse-mosquitto",
-        "koenkk/zigbee2mqtt",
-        "nodered/node-red"
-      ],
       "automerge": true,
-      "schedule": ["every weekend"]
+      "schedule": ["every weekend"],
+      "matchPackageNames": [
+        "!ghcr.io/home-assistant/home-assistant",
+        "!eclipse-mosquitto",
+        "!koenkk/zigbee2mqtt",
+        "!nodered/node-red"
+      ]
     }
   ],
   "rebaseWhen": "behind-base-branch",
