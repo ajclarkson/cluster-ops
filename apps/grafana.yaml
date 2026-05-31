@@ -53,6 +53,9 @@ spec:
                 path: /spec/revisionHistoryLimit
                 value: 1
   values:
+    deploymentStrategy:
+      type: Recreate
+
     persistence:
       enabled: true
       size: 5Gi
