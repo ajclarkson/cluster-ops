@@ -1,12 +1,10 @@
 locals {
-  # Internal cluster service base — nginx ingress
-  cluster_ingress = "http://10.0.0.30"
-
   # Public routes exposed via tunnel (explicit whitelist — add deliberately)
+  # Route directly to cluster services, bypassing nginx ingress
   tunnel_routes = {
     "sso" = {
       hostname = "sso.clarksons.me"
-      service  = local.cluster_ingress
+      service  = "http://keycloak-service.keycloak.svc:8080"
     }
   }
 }
@@ -14,7 +12,6 @@ locals {
 resource "cloudflare_zero_trust_tunnel_cloudflared" "cluster" {
   account_id = var.cloudflare_account_id
   name       = "rackman"
-  secret     = var.tunnel_secret
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "cluster" {
@@ -27,9 +24,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "cluster" {
         for name, route in local.tunnel_routes : {
           hostname = route.hostname
           service  = route.service
-          origin_request = {
-            http_host_header = route.hostname
-          }
         }
       ],
       # Catch-all — must be last
