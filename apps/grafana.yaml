@@ -68,6 +68,21 @@ spec:
     grafana.ini:
       server:
         root_url: https://grafana.${local_ingress_domain}
+      auth.generic_oauth:
+        enabled: true
+        name: Keycloak
+        allow_sign_up: true
+        client_id: grafana
+        client_secret: "${KEYCLOAK_GRAFANA_CLIENT_SECRET}"
+        scopes: openid email profile roles
+        email_attribute_path: email
+        login_attribute_path: preferred_username
+        name_attribute_path: name
+        auth_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/auth
+        token_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/token
+        api_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/userinfo
+        role_attribute_path: "'Admin'"
+        use_pkce: true
 
     datasources:
       datasources.yaml:
