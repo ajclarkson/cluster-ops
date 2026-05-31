@@ -18,7 +18,7 @@ resource "grafana_rule_group" "node_alerts" {
         from = 300
         to   = 0
       }
-      datasource_uid = grafana_data_source.mimir.uid
+      datasource_uid = data.grafana_data_source.mimir.uid
       model = jsonencode({
         expr         = "instance:node_memory_utilisation:ratio{job=\"integrations/node_exporter\"} > 0"
         instant      = true
