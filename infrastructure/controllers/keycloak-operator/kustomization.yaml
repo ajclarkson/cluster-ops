@@ -10,3 +10,17 @@ resources:
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.4.0/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
   # renovate: datasource=github-tags depName=keycloak/keycloak-k8s-resources
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.4.0/kubernetes/kubernetes.yml
+patches:
+  - target:
+      kind: Deployment
+      name: keycloak-operator
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: 256Mi
+            cpu: 50m
+          limits:
+            memory: 512Mi
+            cpu: 200m
