@@ -53,6 +53,9 @@ spec:
                 path: /spec/revisionHistoryLimit
                 value: 1
   values:
+    # client_secret is injected by Flux substituteFrom at apply time, never in git
+    assertNoLeakedSecrets: false
+
     deploymentStrategy:
       type: Recreate
 
