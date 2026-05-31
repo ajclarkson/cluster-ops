@@ -1,6 +1,6 @@
 # cluster-ops
 
-GitOps management for a 3-node Raspberry Pi 4 (8GB) k3s homelab cluster. Flux CD reconciles everything from this repo.
+GitOps management for a 3-node Raspberry Pi 5 (256GB NVMe) k3s homelab cluster. Flux CD reconciles everything from this repo.
 
 ## Core constraint
 
@@ -8,12 +8,13 @@ GitOps management for a 3-node Raspberry Pi 4 (8GB) k3s homelab cluster. Flux CD
 
 ## Architecture
 
-- **Nodes**: `blinky`, `inky`, `pinky` — single control plane (blinky), all run workloads
-- **VIP**: kube-vip on `10.0.0.20`, load balancer range `10.0.0.30–39`
-- **Storage**: Longhorn (RWO/RWX), 2 replicas, Retain policy
-- **Reconciliation order**: `infra-controllers` → `infra-configs` → `apps` → `patches`
+- **Nodes**: `blinky` (10.0.0.51), `inky` (10.0.0.52), `pinky` (10.0.0.53) — 3-master HA with embedded etcd, all run workloads
+- **VIP**: kube-vip on `10.0.0.50` (`rackman.local.clarksons.me`), router points DNS to VIP
+- **Storage**: Longhorn (RWO/RWX), 2 replicas, Retain policy. iSCSI loaded via `iscsid` service (no dm_crypt — encryption not in use)
+- **Reconciliation order**: `infra-crds` → `infra-controllers` → `infra-configs` → `apps` → `patches`
 - **Secrets**: 1Password Connect via External Secrets Operator
 - **Observability**: alloy-metrics (Mimir) + alloy-logs (Loki) via k8s-monitoring Helm chart, dashboards in Grafana
+- **SSO**: oauth2-proxy in front of UIs that lack auth, backed by Keycloak with Google IdP. Custom first-broker flow removes account auto-registration.
 
 ## Key patterns
 
