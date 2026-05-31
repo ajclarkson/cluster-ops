@@ -130,7 +130,7 @@ spec:
   http:
     httpEnabled: true
   hostname:
-    hostname: https://sso.${local_ingress_domain}
+    hostname: https://sso.clarksons.me
     strict: true
   proxy:
     headers: xforwarded
