@@ -20,3 +20,4 @@ spec:
         name: cluster-config
       - kind: Secret
         name: keycloak-realm-secrets
+        optional: true
