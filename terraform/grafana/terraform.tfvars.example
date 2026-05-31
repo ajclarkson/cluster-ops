@@ -1,0 +1,2 @@
+grafana_url                   = "http://grafana.local.clarksons.me"
+grafana_service_account_token = "glsa_xxxx"
