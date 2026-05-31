@@ -22,6 +22,29 @@ spec:
     ssoSessionIdleTimeout: 1800
     ssoSessionMaxLifespan: 36000
 
+    groups:
+      - name: admins
+      - name: users
+
+    clientScopes:
+      - name: groups
+        description: Group membership claims for role mapping
+        protocol: openid-connect
+        attributes:
+          include.in.token.scope: "true"
+          display.on.consent.screen: "false"
+        protocolMappers:
+          - name: groups
+            protocol: openid-connect
+            protocolMapper: oidc-group-membership-mapper
+            consentRequired: false
+            config:
+              full.path: "false"
+              id.token.claim: "true"
+              access.token.claim: "true"
+              claim.name: groups
+              userinfo.token.claim: "true"
+
     identityProviders:
       - alias: google
         providerId: google
@@ -201,6 +224,7 @@ spec:
           - roles
           - basic
           - email
+          - groups
         optionalClientScopes:
           - address
           - phone
@@ -341,3 +365,14 @@ spec:
       - alias: Google-First-Broker first-broker-login-conditional-credential
         config:
           credentials: webauthn-passwordless
+
+    users:
+      - username: guest
+        enabled: true
+        emailVerified: false
+        credentials:
+          - type: password
+            value: "${KEYCLOAK_GUEST_PASSWORD}"
+            temporary: false
+        groups:
+          - users
