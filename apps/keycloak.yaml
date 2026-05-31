@@ -203,14 +203,14 @@ spec:
         provider="keycloak-oidc"
         provider_display_name="Keycloak"
         redirect_url="https://oauth2.local.clarksons.me/oauth2/callback"
-        oidc_issuer_url="https://sso.local.clarksons.me/realms/rackman"
+        oidc_issuer_url="https://sso.clarksons.me/realms/rackman"
         code_challenge_method="S256"
         http_address="0.0.0.0:4180"
         upstreams="file:///dev/null"
         email_domains=["*"]
         cookie_domains=["clarksons.me"]
         cookie_secure=false
-        scope="openid"
+        scope="openid email profile"
         whitelist_domains=["*.clarksons.me"]
         insecure_oidc_allow_unverified_email="true"
         silence_ping_logging=true
