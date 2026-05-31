@@ -4,3 +4,4 @@ resources:
 - cert-manager.yaml
 - external-secrets.yaml
 - plans.yaml
+- keycloak-realm-secrets.yaml
