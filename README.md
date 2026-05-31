@@ -17,66 +17,37 @@ GitOps repo for a 3-node Raspberry Pi 5 k3s homelab cluster. Flux CD reconciles 
 
 ## Bootstrap
 
-### 1. Node prep
+### 1. Flash nodes
 
-Flash Raspberry Pi OS Lite (64-bit) directly to NVMe via Raspberry Pi Imager. Set static IP leases on the router (`.51/.52/.53`).
+Flash Raspberry Pi OS Lite (64-bit) directly to NVMe via Raspberry Pi Imager. In **OS Customisation**:
 
-On each node, apply the following before installing k3s:
+- Set username to `ajclarkson`
+- Paste your SSH public key and enable SSH
+- Set the hostname (`blinky` / `inky` / `pinky`)
 
-```bash
-# Enable cgroup memory (required for k3s)
-sudo sed -i 's/$/ cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory/' /boot/firmware/cmdline.txt
+Set static IP leases on the router (`.51/.52/.53`).
 
-# Reduce GPU memory split (headless node)
-echo 'gpu_mem=16' | sudo tee -a /boot/firmware/config.txt
+### 2. Node prep
 
-# Install open-iscsi for Longhorn
-sudo apt install -y open-iscsi
-sudo systemctl enable iscsid
-
-sudo reboot
-```
-
-### 2. Install k3s
-
-First master:
-```bash
-k3sup install \
-  --ip 10.0.0.51 \
-  --tls-san 10.0.0.50 \
-  --tls-san rackman.local.clarksons.me \
-  --cluster \
-  --k3s-channel latest \
-  --no-extras \
-  --local-path $HOME/.kube/config \
-  --user ajclarkson \
-  --merge
-```
-
-Additional masters:
-```bash
-k3sup join \
-  --ip 10.0.0.52 \
-  --server-ip 10.0.0.51 \
-  --server \
-  --k3s-channel latest \
-  --user ajclarkson \
-  --k3s-extra-args '--disable=traefik --disable=servicelb --disable-network-policy'
-```
-
-Repeat for `10.0.0.53`.
-
-### 3. Bootstrap Flux
+From your local machine, once all three nodes are booted and reachable:
 
 ```bash
-flux bootstrap gitlab \
-  --owner=ajclarkson \
-  --repository=cluster-ops \
-  --branch=main \
-  --path=clusters/rackman
+scripts/prep-all-nodes.sh
 ```
+
+This SSHes into each node, enables cgroup memory, reduces GPU memory split, installs `open-iscsi`, and reboots. It waits for each node to come back before moving on.
+
+### 3. Install k3s and bootstrap Flux
+
+```bash
+scripts/cluster-install.sh
+```
+
+Installs k3s on the first master via `k3sup`, joins the other two, then runs `flux bootstrap`. Requires `k3sup`, `flux`, and `kubectl` on your local machine.
 
 Flux will reconcile the rest from this repo. Reconciliation order: `infra-crds` → `infra-controllers` → `infra-configs` → `apps` → `patches`.
+
+> **Note:** kube-vip is deployed by Flux, so the control-plane VIP (`10.0.0.50`) won't exist until after bootstrap completes. This is fine — k3sup uses direct node IPs throughout, and the VIP is pre-added as a TLS SAN so it works as soon as kube-vip comes up. Once it does, update your kubeconfig server address from `10.0.0.51` to `10.0.0.50` to get HA control-plane access.
 
 ## Key services
 
