@@ -1,0 +1,373 @@
+---
+# Pulls all Keycloak realm client secrets into a single Secret for Flux substitution
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: keycloak-realm-secrets
+  namespace: keycloak
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: KEYCLOAK_GOOGLE_CLIENT_SECRET
+      remoteRef:
+        key: "keycloak-realm-secrets"
+        property: google-client-secret
+    - secretKey: KEYCLOAK_OAUTH2_PROXY_CLIENT_SECRET
+      remoteRef:
+        key: "keycloak-realm-secrets"
+        property: oauth2-proxy-client-secret
+    - secretKey: KEYCLOAK_CLAUDE_CODE_CLIENT_SECRET
+      remoteRef:
+        key: "keycloak-realm-secrets"
+        property: claude-code-client-secret
+    - secretKey: KEYCLOAK_GRAFANA_CLIENT_SECRET
+      remoteRef:
+        key: "keycloak-realm-secrets"
+        property: grafana-client-secret
+    - secretKey: KEYCLOAK_HOME_ASSISTANT_CLIENT_SECRET
+      remoteRef:
+        key: "keycloak-realm-secrets"
+        property: home-assistant-client-secret
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: rackman
+  namespace: keycloak
+spec:
+  keycloakCRName: keycloak
+  realm:
+    realm: rackman
+    enabled: true
+    sslRequired: external
+    registrationAllowed: false
+    registrationEmailAsUsername: false
+    rememberMe: false
+    verifyEmail: false
+    loginWithEmailAllowed: true
+    duplicateEmailsAllowed: false
+    resetPasswordAllowed: false
+    editUsernameAllowed: false
+    accessTokenLifespan: 300
+    ssoSessionIdleTimeout: 1800
+    ssoSessionMaxLifespan: 36000
+
+    identityProviders:
+      - alias: google
+        providerId: google
+        enabled: true
+        updateProfileFirstLoginMode: "on"
+        trustEmail: false
+        storeToken: false
+        addReadTokenRoleOnCreate: false
+        authenticateByDefault: false
+        linkOnly: false
+        hideOnLogin: false
+        firstBrokerLoginFlowAlias: Google-First-Broker
+        config:
+          acceptsPromptNoneForwardFromClient: "false"
+          clientId: "1054993587116-c5850t3omtnter0pvkul8avbn5329oov.apps.googleusercontent.com"
+          clientSecret: "${KEYCLOAK_GOOGLE_CLIENT_SECRET}"
+          disableUserInfo: "false"
+          filteredByClaim: "false"
+          syncMode: LEGACY
+          caseSensitiveOriginalUsername: "false"
+
+    clients:
+      - clientId: oauth2-proxy
+        name: oauth2-proxy
+        enabled: true
+        clientAuthenticatorType: client-secret
+        secret: "${KEYCLOAK_OAUTH2_PROXY_CLIENT_SECRET}"
+        redirectUris:
+          - "https://oauth2.local.clarksons.me/oauth2/callback"
+          - "https://oauth2.clarksons.me/oauth2/callback"
+        webOrigins:
+          - "https://oauth2.local.clarksons.me"
+          - "https://oauth2.clarksons.me"
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        publicClient: false
+        frontchannelLogout: true
+        protocol: openid-connect
+        fullScopeAllowed: true
+        attributes:
+          backchannel.logout.session.required: "true"
+          backchannel.logout.revoke.offline.tokens: "false"
+        protocolMappers:
+          - name: aud-mapper-oauth2-proxy
+            protocol: openid-connect
+            protocolMapper: oidc-audience-mapper
+            consentRequired: false
+            config:
+              included.client.audience: oauth2-proxy
+              id.token.claim: "true"
+              access.token.claim: "true"
+              introspection.token.claim: "true"
+        defaultClientScopes:
+          - web-origins
+          - acr
+          - profile
+          - roles
+          - basic
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - organization
+          - microprofile-jwt
+
+      - clientId: claude-code
+        name: claude-code
+        description: "Service account for Claude Code to access Node-RED API via oauth2-proxy"
+        enabled: true
+        clientAuthenticatorType: client-secret
+        secret: "${KEYCLOAK_CLAUDE_CODE_CLIENT_SECRET}"
+        redirectUris:
+          - "/*"
+        webOrigins:
+          - "/*"
+        standardFlowEnabled: false
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: true
+        publicClient: false
+        frontchannelLogout: true
+        protocol: openid-connect
+        fullScopeAllowed: true
+        attributes:
+          backchannel.logout.session.required: "true"
+          backchannel.logout.revoke.offline.tokens: "false"
+        protocolMappers:
+          - name: oauth2-proxy-audience
+            protocol: openid-connect
+            protocolMapper: oidc-audience-mapper
+            consentRequired: false
+            config:
+              included.client.audience: oauth2-proxy
+              id.token.claim: "false"
+              access.token.claim: "true"
+              introspection.token.claim: "true"
+        defaultClientScopes:
+          - service_account
+          - web-origins
+          - acr
+          - profile
+          - roles
+          - basic
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - organization
+          - microprofile-jwt
+
+      - clientId: grafana
+        name: grafana
+        enabled: true
+        clientAuthenticatorType: client-secret
+        secret: "${KEYCLOAK_GRAFANA_CLIENT_SECRET}"
+        redirectUris:
+          - "https://grafana.local.clarksons.me/login/generic_oauth"
+          - "https://grafana.clarksons.me/login/generic_oauth"
+        webOrigins:
+          - "https://grafana.local.clarksons.me"
+          - "https://grafana.clarksons.me"
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        publicClient: false
+        frontchannelLogout: true
+        protocol: openid-connect
+        fullScopeAllowed: true
+        attributes:
+          backchannel.logout.session.required: "true"
+          backchannel.logout.revoke.offline.tokens: "false"
+        defaultClientScopes:
+          - web-origins
+          - acr
+          - profile
+          - roles
+          - basic
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - organization
+          - microprofile-jwt
+
+      - clientId: home-assistant
+        name: home-assistant
+        enabled: true
+        clientAuthenticatorType: client-secret
+        secret: "${KEYCLOAK_HOME_ASSISTANT_CLIENT_SECRET}"
+        redirectUris:
+          - "https://home.local.clarksons.me/auth/oidc/callback"
+          - "https://home.clarksons.me/auth/oidc/callback"
+        webOrigins:
+          - "https://home.local.clarksons.me"
+          - "https://home.clarksons.me"
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        publicClient: false
+        frontchannelLogout: true
+        protocol: openid-connect
+        fullScopeAllowed: true
+        attributes:
+          backchannel.logout.session.required: "true"
+          backchannel.logout.revoke.offline.tokens: "false"
+        defaultClientScopes:
+          - web-origins
+          - acr
+          - profile
+          - roles
+          - basic
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - organization
+          - microprofile-jwt
+
+    # Custom first-broker flow for Google IdP — blocks auto-registration,
+    # requires an existing account to link against.
+    authenticationFlows:
+      - alias: Google-First-Broker
+        description: "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account"
+        providerId: basic-flow
+        topLevel: true
+        builtIn: false
+        authenticationExecutions:
+          - authenticatorConfig: Google-First-Broker review profile config
+            authenticator: idp-review-profile
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 10
+          - authenticatorFlow: true
+            requirement: REQUIRED
+            priority: 20
+            flowAlias: Google-First-Broker User creation or linking
+          - authenticatorFlow: true
+            requirement: CONDITIONAL
+            priority: 60
+            flowAlias: Google-First-Broker First Broker Login - Conditional Organization
+
+      - alias: Google-First-Broker User creation or linking
+        description: "Flow for the existing/non-existing user alternatives"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticatorFlow: true
+            requirement: ALTERNATIVE
+            priority: 20
+            flowAlias: Google-First-Broker Handle Existing Account
+
+      - alias: Google-First-Broker Handle Existing Account
+        description: "Handle what to do if there is existing account with same email/username like authenticated identity provider"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticator: idp-confirm-link
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 10
+          - authenticatorFlow: true
+            requirement: REQUIRED
+            priority: 20
+            flowAlias: Google-First-Broker Account verification options
+
+      - alias: Google-First-Broker Account verification options
+        description: "Method with which to verify the existing account"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticator: idp-email-verification
+            authenticatorFlow: false
+            requirement: ALTERNATIVE
+            priority: 10
+          - authenticatorFlow: true
+            requirement: ALTERNATIVE
+            priority: 20
+            flowAlias: Google-First-Broker Verify Existing Account by Re-authentication
+
+      - alias: Google-First-Broker Verify Existing Account by Re-authentication
+        description: "Reauthentication of existing account"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticator: idp-username-password-form
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 10
+          - authenticatorFlow: true
+            requirement: CONDITIONAL
+            priority: 20
+            flowAlias: Google-First-Broker First broker login - Conditional 2FA
+
+      - alias: Google-First-Broker First broker login - Conditional 2FA
+        description: "Flow to determine if any 2FA is required for the authentication"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticator: conditional-user-configured
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 10
+          - authenticatorConfig: Google-First-Broker first-broker-login-conditional-credential
+            authenticator: conditional-credential
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 20
+          - authenticator: auth-otp-form
+            authenticatorFlow: false
+            requirement: ALTERNATIVE
+            priority: 30
+          - authenticator: webauthn-authenticator
+            authenticatorFlow: false
+            requirement: DISABLED
+            priority: 40
+          - authenticator: auth-recovery-authn-code-form
+            authenticatorFlow: false
+            requirement: DISABLED
+            priority: 50
+
+      - alias: Google-First-Broker First Broker Login - Conditional Organization
+        description: "Flow to determine if the authenticator that adds organization members is to be used"
+        providerId: basic-flow
+        topLevel: false
+        builtIn: false
+        authenticationExecutions:
+          - authenticator: conditional-user-configured
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 10
+          - authenticator: idp-add-organization-member
+            authenticatorFlow: false
+            requirement: REQUIRED
+            priority: 20
+
+    authenticatorConfig:
+      - alias: Google-First-Broker review profile config
+        config:
+          update.profile.on.first.login: missing
+      - alias: Google-First-Broker first-broker-login-conditional-credential
+        config:
+          credentials: webauthn-passwordless

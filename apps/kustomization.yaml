@@ -11,5 +11,6 @@ resources:
 - loki.yaml
 - k8s-monitoring.yaml
 - keycloak.yaml
+- keycloak-realm.yaml
 - mimir.yaml
 - mqtt-events-bridge.yaml
