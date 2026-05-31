@@ -10,6 +10,7 @@ spec:
     realm: rackman
     enabled: true
     sslRequired: external
+    bruteForceProtected: true
     registrationAllowed: false
     registrationEmailAsUsername: false
     rememberMe: false
