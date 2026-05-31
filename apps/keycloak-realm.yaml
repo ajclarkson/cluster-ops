@@ -42,7 +42,6 @@ spec:
           filteredByClaim: "false"
           syncMode: LEGACY
           caseSensitiveOriginalUsername: "false"
-          useEmailAsUsername: "true"
 
     clients:
       - clientId: oauth2-proxy
