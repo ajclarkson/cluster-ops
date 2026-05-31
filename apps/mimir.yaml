@@ -65,6 +65,8 @@ spec:
         ingest_storage:
           enabled: false
         ingester:
+          ring:
+            replication_factor: 1
           push_grpc_method_enabled: true
         blocks_storage:
           backend: s3
@@ -84,7 +86,7 @@ spec:
           compactor_blocks_retention_period: 24h
 
     ingester:
-      replicas: 2
+      replicas: 1
       persistentVolume:
         enabled: true
         accessModes:
@@ -142,6 +144,8 @@ spec:
 
     store_gateway:
       replicas: 1
+      zoneAwareReplication:
+        enabled: false
       resources:
         requests:
           memory: 128Mi
