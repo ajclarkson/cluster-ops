@@ -237,6 +237,10 @@ spec:
         topLevel: false
         builtIn: false
         authenticationExecutions:
+          - authenticator: idp-detect-existing-broker-user
+            authenticatorFlow: false
+            requirement: ALTERNATIVE
+            priority: 10
           - authenticatorFlow: true
             requirement: ALTERNATIVE
             priority: 20
