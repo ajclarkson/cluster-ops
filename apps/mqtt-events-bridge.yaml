@@ -11,6 +11,7 @@ metadata:
   namespace: mqtt-events-bridge
 spec:
   replicas: 1
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: mqtt-events-bridge
