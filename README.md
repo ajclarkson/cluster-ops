@@ -47,6 +47,8 @@ Installs k3s on the first master via `k3sup`, joins the other two, then runs `fl
 
 Flux will reconcile the rest from this repo. Reconciliation order: `infra-crds` → `infra-controllers` → `infra-configs` → `apps` → `patches`.
 
+> **Note:** kube-vip is deployed by Flux, so the control-plane VIP (`10.0.0.50`) won't exist until after bootstrap completes. This is fine — k3sup uses direct node IPs throughout, and the VIP is pre-added as a TLS SAN so it works as soon as kube-vip comes up. Once it does, update your kubeconfig server address from `10.0.0.51` to `10.0.0.50` to get HA control-plane access.
+
 ## Key services
 
 | Service | URL |
