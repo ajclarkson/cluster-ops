@@ -71,8 +71,8 @@ spec:
     grafana.ini:
       server:
         root_url: https://grafana.${local_ingress_domain}
-      log:
-        level: debug
+      users:
+        auto_assign_org_role: Admin
       auth:
         # allows linking OAuth identity to an existing local user matched by email
         oauth_allow_insecure_email_lookup: true
@@ -89,7 +89,7 @@ spec:
         auth_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/auth
         token_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/token
         api_url: https://sso.${external_ingress_domain}/realms/rackman/protocol/openid-connect/userinfo
-        role_attribute_path: "'Admin'"
+        skip_org_role_sync: true
         use_pkce: true
 
     datasources:
