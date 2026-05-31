@@ -12,13 +12,8 @@ variable "cloudflare_zone_id" {
   description = "Zone ID for clarksons.me"
 }
 
-variable "tunnel_id" {
-  type        = string
-  description = "Cloudflare Tunnel ID (from the Cloudflare dashboard)"
-}
-
 variable "tunnel_secret" {
-  type      = string
-  sensitive = true
-  description = "Cloudflare Tunnel secret (base64 encoded)"
+  type        = string
+  sensitive   = true
+  description = "Tunnel secret — base64-encoded 32-byte random value. Generate with: openssl rand -base64 32"
 }

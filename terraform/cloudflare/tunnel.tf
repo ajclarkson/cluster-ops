@@ -6,15 +6,20 @@ locals {
   tunnel_routes = {
     "sso" = {
       hostname = "sso.clarksons.me"
-      service  = "${local.cluster_ingress}"
-      # Keycloak handles its own auth — no additional access policy needed
+      service  = local.cluster_ingress
     }
   }
 }
 
+resource "cloudflare_zero_trust_tunnel_cloudflared" "cluster" {
+  account_id = var.cloudflare_account_id
+  name       = "rackman"
+  secret     = var.tunnel_secret
+}
+
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "cluster" {
   account_id = var.cloudflare_account_id
-  tunnel_id  = var.tunnel_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.cluster.id
 
   config = {
     ingress = concat(
@@ -39,7 +44,7 @@ resource "cloudflare_dns_record" "tunnel_routes" {
   zone_id = var.cloudflare_zone_id
   name    = each.value.hostname
   type    = "CNAME"
-  content = "${var.tunnel_id}.cfargotunnel.com"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.cluster.id}.cfargotunnel.com"
   proxied = true
   ttl     = 1
 }
