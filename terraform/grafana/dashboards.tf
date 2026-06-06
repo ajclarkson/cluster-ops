@@ -6,3 +6,8 @@ resource "grafana_dashboard" "cluster_health" {
   folder      = grafana_folder.dashboards.uid
   config_json = file("${path.module}/dashboards/cluster-health.json")
 }
+
+resource "grafana_dashboard" "ha_stack_health" {
+  folder      = grafana_folder.dashboards.uid
+  config_json = file("${path.module}/dashboards/ha-stack-health.json")
+}
