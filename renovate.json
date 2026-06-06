@@ -28,7 +28,8 @@
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "groupName": "home automation",
-      "automerge": false
+      "automerge": false,
+      "minimumReleaseAge": "14 days"
     },
     {
       "matchUpdateTypes": ["patch"],
