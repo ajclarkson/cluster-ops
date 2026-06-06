@@ -25,7 +25,9 @@ resource "grafana_contact_point" "clarksons_slack" {
   }
 
   webhook {
-    url     = "http://ntfy.ntfy.svc/rackman"
-    message = "{{ if eq .Status \"firing\" }}🔴{{ else }}✅{{ end }} {{ .CommonLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+    url                      = "http://ntfy.ntfy.svc/rackman"
+    authorization_scheme     = "Bearer"
+    authorization_credentials = var.ntfy_token
+    message                  = "{{ if eq .Status \"firing\" }}🔴{{ else }}✅{{ end }} {{ .CommonLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
   }
 }

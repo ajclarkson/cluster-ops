@@ -5,6 +5,18 @@ metadata:
   name: ntfy
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ntfy-data
+  namespace: ntfy
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ntfy-config
@@ -13,7 +25,10 @@ data:
   server.yml: |
     base-url: https://ntfy.clarksons.me
     listen-http: ":80"
+    cache-file: /var/lib/ntfy/cache.db
     cache-duration: 12h
+    auth-file: /var/lib/ntfy/auth.db
+    auth-default-access: deny-all
     upstream-base-url: https://ntfy.sh
 ---
 apiVersion: apps/v1
@@ -24,6 +39,8 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: ntfy
@@ -42,6 +59,8 @@ spec:
             - name: config
               mountPath: /etc/ntfy/server.yml
               subPath: server.yml
+            - name: data
+              mountPath: /var/lib/ntfy
           resources:
             requests:
               cpu: 10m
@@ -53,6 +72,9 @@ spec:
         - name: config
           configMap:
             name: ntfy-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: ntfy-data
 ---
 apiVersion: v1
 kind: Service

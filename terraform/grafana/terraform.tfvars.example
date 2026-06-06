@@ -1,3 +1,4 @@
 grafana_url                   = "http://grafana.local.clarksons.me"
 grafana_service_account_token = "glsa_xxxx"
 slack_webhook_url             = "https://hooks.slack.com/services/xxxx"
+ntfy_token                    = "tk_xxxx"
