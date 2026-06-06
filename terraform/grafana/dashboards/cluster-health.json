@@ -96,14 +96,14 @@
           "options": { "include": { "names": ["namespace", "pod", "container", "Value"] } }
         },
         {
-          "id": "sortBy",
-          "options": { "fields": [{ "displayName": "Value", "desc": true }] }
-        },
-        {
           "id": "organize",
           "options": {
             "renameByName": { "Value": "Restarts" }
           }
+        },
+        {
+          "id": "sortBy",
+          "options": { "fields": [{ "displayName": "Restarts", "desc": true }] }
         }
       ],
       "fieldConfig": {
@@ -112,6 +112,7 @@
           {
             "matcher": { "id": "byName", "options": "Restarts" },
             "properties": [
+              { "id": "decimals", "value": 0 },
               { "id": "custom.width", "value": 80 },
               {
                 "id": "thresholds",
