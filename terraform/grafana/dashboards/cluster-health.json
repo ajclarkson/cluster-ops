@@ -101,10 +101,6 @@
             "renameByName": { "Value": "Restarts" }
           }
         },
-        {
-          "id": "sortBy",
-          "options": { "fields": [{ "displayName": "Restarts", "desc": true }] }
-        }
       ],
       "fieldConfig": {
         "defaults": {},
@@ -130,7 +126,10 @@
           }
         ]
       },
-      "options": { "footer": { "show": false } }
+      "options": {
+        "sortBy": [{ "displayName": "Restarts", "desc": true }],
+        "footer": { "show": false }
+      }
     },
     {
       "id": 4,
