@@ -17,7 +17,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"home-assistant\", container=\"home-assistant\"}[24h])",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"home-assistant\", container=\"home-assistant\"}[24h]))",
           "instant": true
         }
       ],
@@ -52,7 +52,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"zigbee2mqtt\", container=\"zigbee2mqtt\"}[24h])",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"zigbee2mqtt\", container=\"zigbee2mqtt\"}[24h]))",
           "instant": true
         }
       ],
@@ -87,7 +87,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"node-red\", container=\"node-red\"}[24h])",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"node-red\", container=\"node-red\"}[24h]))",
           "instant": true
         }
       ],
@@ -122,7 +122,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"mqtt\", container=\"mosquitto\"}[24h])",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"mqtt\", container=\"mosquitto\"}[24h]))",
           "instant": true
         }
       ],
@@ -157,8 +157,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|node-red|mqtt\", container=~\"home-assistant|zigbee2mqtt|node-red|mosquitto\"}",
-          "legendFormat": "{{ namespace }}/{{ container }}"
+          "expr": "sum by (namespace, container) (container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|node-red|mqtt\", container=~\"home-assistant|zigbee2mqtt|node-red|mosquitto\"})",
+          "legendFormat": "{{ namespace }}"
         }
       ],
       "fieldConfig": {
@@ -226,26 +226,27 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{namespace=\"home-assistant\"} |= \"ERROR\" != \"async_upnp_client.ssdp\"",
+          "expr": "{namespace=\"home-assistant\"} |= \"ERROR\" != \"async_upnp_client.ssdp\" | line_format \"[home-assistant] {{__line__}}\"",
           "queryType": "range"
         },
         {
           "refId": "B",
-          "expr": "{namespace=\"zigbee2mqtt\"} |~ \"\\\\[31m\"",
+          "expr": "{namespace=\"zigbee2mqtt\"} |~ \"\\\\[31m\" | line_format \"[zigbee2mqtt] {{__line__}}\"",
           "queryType": "range"
         },
         {
           "refId": "C",
-          "expr": "{namespace=\"node-red\"} |= \"level=error\"",
+          "expr": "{namespace=\"node-red\"} |= \"level=error\" | line_format \"[node-red] {{__line__}}\"",
           "queryType": "range"
         }
       ],
       "options": {
         "dedupStrategy": "none",
-        "showLabels": true,
+        "showLabels": false,
         "showTime": true,
         "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "wrapLogMessage": true,
+        "displayedFields": []
       }
     }
   ]
