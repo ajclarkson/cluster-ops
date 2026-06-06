@@ -54,7 +54,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\"} [24h]))",
           "queryType": "range"
         }
       ],
@@ -80,7 +80,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | outputs_result=\"error\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\"} [24h]))",
           "queryType": "range"
         }
       ],
@@ -113,7 +113,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"lighting\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"lighting\"} [2h]))",
           "queryType": "range"
         }
       ],
@@ -146,7 +146,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"occupied\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"occupied\"} [2h]))",
           "queryType": "range"
         }
       ],
@@ -179,7 +179,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"sonos\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"sonos\"} [2h]))",
           "queryType": "range"
         }
       ],
@@ -212,7 +212,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | location=~\"$location\" | subsystem=~\"$subsystem\" [10m]))",
+          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} [10m]))",
           "legendFormat": "{{ subsystem }}",
           "queryType": "range"
         }
@@ -244,7 +244,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | location=~\"$location\" | subsystem=~\"$subsystem\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}}\"",
           "queryType": "range"
         }
       ],
@@ -266,7 +266,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\"} | json | outputs_result=\"error\" | location=~\"$location\" | subsystem=~\"$subsystem\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} ({{.reason}}) — {{.outputs_action}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} ({{.reason}}) — {{.outputs_action}}\"",
           "queryType": "range"
         }
       ],
