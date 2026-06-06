@@ -14,6 +14,7 @@ data:
     base-url: https://ntfy.clarksons.me
     listen-http: ":80"
     cache-duration: 12h
+    upstream-base-url: https://ntfy.sh
 ---
 apiVersion: apps/v1
 kind: Deployment
