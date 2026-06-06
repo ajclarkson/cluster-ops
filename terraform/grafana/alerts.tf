@@ -380,6 +380,154 @@ resource "grafana_rule_group" "infra_5m" {
       contact_point = "Clarksons Slack"
     }
   }
+
+  rule {
+    name      = "NodeRedErrorSpike"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.loki.uid
+      model = jsonencode({
+        datasource = { type = "loki", uid = "loki" }
+        editorMode = "code"
+        expr       = "sum(count_over_time({namespace=\"node-red\"} |= \"level=error\" [15m]))"
+        queryType  = "range"
+        refId      = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [5], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "0s"
+    annotations = {
+      description = "Node-RED has logged more than 5 errors in the last 15 minutes. Check for HA connection failures or broken flows."
+      summary     = "Node-RED error spike — possible HA connection issue or broken flow"
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
+    name      = "HomeAssistantErrorSpike"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.loki.uid
+      model = jsonencode({
+        datasource = { type = "loki", uid = "loki" }
+        editorMode = "code"
+        expr       = "sum(count_over_time({namespace=\"home-assistant\"} |= \"ERROR\" != \"async_upnp_client.ssdp\" [15m]))"
+        queryType  = "range"
+        refId      = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [5], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "0s"
+    annotations = {
+      description = "Home Assistant has logged more than 5 errors in the last 15 minutes (SSDP noise excluded). Check the HA stack health dashboard for details."
+      summary     = "Home Assistant error spike"
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
 }
 
 resource "grafana_rule_group" "infra_1m" {
