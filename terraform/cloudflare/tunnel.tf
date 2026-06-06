@@ -10,6 +10,10 @@ locals {
       hostname = "home.clarksons.me"
       service  = "http://home-assistant.home-assistant.svc:8123"
     }
+    "ntfy" = {
+      hostname = "ntfy.clarksons.me"
+      service  = "http://ntfy.ntfy.svc:80"
+    }
   }
 }
 

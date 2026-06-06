@@ -23,4 +23,9 @@ resource "grafana_contact_point" "clarksons_slack" {
     text                    = "{{ template \"rackman.slack.text\" . }}"
     disable_resolve_message = false
   }
+
+  webhook {
+    url     = "http://ntfy.ntfy.svc/rackman"
+    message = "{{ if eq .Status \"firing\" }}🔴{{ else }}✅{{ end }} {{ .CommonLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+  }
 }
