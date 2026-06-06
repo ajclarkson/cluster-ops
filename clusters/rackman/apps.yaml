@@ -12,6 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  force: true
   wait: true
   timeout: 10m0s
   postBuild:
