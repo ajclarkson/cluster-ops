@@ -1,0 +1,282 @@
+{
+  "title": "Home Automation Behaviour",
+  "uid": "rackman-ha-behaviour",
+  "description": "What the house is doing and why",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "templating": {
+    "list": [
+      {
+        "name": "location",
+        "type": "custom",
+        "label": "Room",
+        "query": ".*,bathroom,bedroom,hallway_downstairs,hallway_upstairs,kitchen,parlour",
+        "options": [
+          { "selected": true,  "text": "All",                  "value": ".*" },
+          { "selected": false, "text": "bathroom",             "value": "bathroom" },
+          { "selected": false, "text": "bedroom",              "value": "bedroom" },
+          { "selected": false, "text": "hallway_downstairs",   "value": "hallway_downstairs" },
+          { "selected": false, "text": "hallway_upstairs",     "value": "hallway_upstairs" },
+          { "selected": false, "text": "kitchen",              "value": "kitchen" },
+          { "selected": false, "text": "parlour",              "value": "parlour" }
+        ],
+        "current": { "selected": true, "text": "All", "value": ".*" },
+        "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "subsystem",
+        "type": "custom",
+        "label": "Subsystem",
+        "query": ".*,lighting,occupied,sonos",
+        "options": [
+          { "selected": true,  "text": "All",      "value": ".*" },
+          { "selected": false, "text": "lighting",  "value": "lighting" },
+          { "selected": false, "text": "occupied",  "value": "occupied" },
+          { "selected": false, "text": "sonos",     "value": "sonos" }
+        ],
+        "current": { "selected": true, "text": "All", "value": ".*" },
+        "includeAll": false,
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Decisions today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" [24h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Errors today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | outputs_result=\"error\" [24h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Lighting — active (2h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"lighting\" [2h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Occupancy — active (2h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"occupied\" [2h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Sonos — active (2h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | subsystem=\"sonos\" [2h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Decision rate by subsystem",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | location=~\"$location\" | subsystem=~\"$subsystem\" [10m]))",
+          "legendFormat": "{{ subsystem }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Recent decisions",
+      "description": "What the house decided to do and why. Expand any row for full input context.",
+      "type": "logs",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\"} | json | event_type=\"decision\" | location=~\"$location\" | subsystem=~\"$subsystem\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    },
+    {
+      "id": 8,
+      "title": "Automation errors",
+      "description": "Action results where outputs.result = error. Should be empty in normal operation.",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 26 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\"} | json | outputs_result=\"error\" | location=~\"$location\" | subsystem=~\"$subsystem\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} ({{.reason}}) — {{.outputs_action}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      }
+    }
+  ]
+}

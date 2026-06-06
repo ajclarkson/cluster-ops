@@ -1,13 +1,11 @@
-resource "grafana_folder" "dashboards" {
-  title = "Dashboards"
-}
-
 resource "grafana_dashboard" "cluster_health" {
-  folder      = grafana_folder.dashboards.uid
   config_json = file("${path.module}/dashboards/cluster-health.json")
 }
 
 resource "grafana_dashboard" "ha_stack_health" {
-  folder      = grafana_folder.dashboards.uid
   config_json = file("${path.module}/dashboards/ha-stack-health.json")
+}
+
+resource "grafana_dashboard" "ha_behaviour" {
+  config_json = file("${path.module}/dashboards/ha-behaviour.json")
 }

@@ -5,7 +5,7 @@
 
 
 resource "grafana_folder" "infra" {
-  title = "Infra"
+  title = "Alerts"
 }
 
 resource "grafana_rule_group" "infra_5m" {
@@ -237,7 +237,8 @@ resource "grafana_rule_group" "infra_5m" {
     condition = "C"
 
     data {
-      ref_id = "A"
+      ref_id     = "A"
+      query_type = "range"
       relative_time_range {
         from = 600
         to   = 0
@@ -386,7 +387,8 @@ resource "grafana_rule_group" "infra_5m" {
     condition = "C"
 
     data {
-      ref_id = "A"
+      ref_id     = "A"
+      query_type = "range"
       relative_time_range {
         from = 900
         to   = 0
@@ -460,7 +462,8 @@ resource "grafana_rule_group" "infra_5m" {
     condition = "C"
 
     data {
-      ref_id = "A"
+      ref_id     = "A"
+      query_type = "range"
       relative_time_range {
         from = 900
         to   = 0
@@ -540,7 +543,8 @@ resource "grafana_rule_group" "infra_1m" {
     condition = "C"
 
     data {
-      ref_id = "A"
+      ref_id     = "A"
+      query_type = "range"
       relative_time_range {
         from = 300
         to   = 0

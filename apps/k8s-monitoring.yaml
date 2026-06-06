@@ -141,6 +141,8 @@ spec:
     telemetryServices:
       kube-state-metrics:
         deploy: true
+      node-exporter:
+        deploy: true
 
     cluster:
       name: k8s-monitoring
