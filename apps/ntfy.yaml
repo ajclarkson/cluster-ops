@@ -29,6 +29,7 @@ data:
     cache-duration: 12h
     auth-file: /var/lib/ntfy/auth.db
     auth-default-access: deny-all
+    web-root: disable
     upstream-base-url: https://ntfy.sh
 ---
 apiVersion: apps/v1
