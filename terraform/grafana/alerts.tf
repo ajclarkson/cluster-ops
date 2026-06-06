@@ -307,6 +307,79 @@ resource "grafana_rule_group" "infra_5m" {
       contact_point = "Clarksons Slack"
     }
   }
+
+  rule {
+    name      = "AppPodRestarting"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "increase(kube_pod_container_status_restarts_total{namespace!~\"kube-system|longhorn-system|loki|flux-system\"}[15m])"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "max"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [2], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "0s"
+    annotations = {
+      description = "{{ $labels.namespace }}/{{ $labels.pod }} has restarted more than twice in the last 15 minutes."
+      summary     = "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash-looping"
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
 }
 
 resource "grafana_rule_group" "infra_1m" {
@@ -392,6 +465,79 @@ resource "grafana_rule_group" "infra_1m" {
     annotations = {
       description = "Node-level OOM kill on {{ $labels.node }}. Process killed: {{ $labels.process }}. Check pod restarts on this node."
       summary     = "System OOM on {{ $labels.node }} — killed {{ $labels.process }}"
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
+    name      = "NodeNotReady"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "kube_node_status_condition{condition=\"Ready\",status=\"true\"}"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [1], type = "lt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "2m"
+    annotations = {
+      description = "Node {{ $labels.node }} has not been Ready for 2 minutes. Check `kubectl get nodes` and recent cluster events."
+      summary     = "Node {{ $labels.node }} is not Ready"
     }
     is_paused = false
 
