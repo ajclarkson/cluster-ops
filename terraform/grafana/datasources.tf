@@ -3,5 +3,5 @@ data "grafana_data_source" "mimir" {
 }
 
 data "grafana_data_source" "loki" {
-  name = "loki"
+  name = "Loki"
 }
