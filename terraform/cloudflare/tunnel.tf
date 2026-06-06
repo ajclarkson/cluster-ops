@@ -6,6 +6,10 @@ locals {
       hostname = "sso.clarksons.me"
       service  = "http://keycloak-service.keycloak.svc:8080"
     }
+    "home" = {
+      hostname = "home.clarksons.me"
+      service  = "http://home-assistant.home-assistant.svc:8123"
+    }
   }
 }
 
