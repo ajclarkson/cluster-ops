@@ -137,7 +137,13 @@ spec:
       destinations:
         - mimir
       collector: alloy-metrics
-      nodeMetrics:
+
+    hostMetrics:
+      enabled: true
+      destinations:
+        - mimir
+      collector: alloy-metrics
+      linuxHosts:
         enabled: true
 
     telemetryServices:
