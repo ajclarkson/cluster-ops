@@ -383,6 +383,79 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
+    name      = "NodeNetworkDrops"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 900
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "sum by (instance) (rate(node_network_receive_drop_total{job=\"integrations/node_exporter\", device!~\"lo|veth.*|cni.*|flannel.*|tunl.*\"}[5m]) + rate(node_network_transmit_drop_total{job=\"integrations/node_exporter\", device!~\"lo|veth.*|cni.*|flannel.*|tunl.*\"}[5m]))"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "max"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [5], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "10m"
+    annotations = {
+      description = "Node {{ $labels.instance }} is dropping more than 5 packets/sec sustained for 10 minutes. May indicate NIC issues or network saturation."
+      summary     = "Network packet drops on {{ $labels.instance }}"
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
     name      = "NodeRedErrorSpike"
     condition = "C"
 

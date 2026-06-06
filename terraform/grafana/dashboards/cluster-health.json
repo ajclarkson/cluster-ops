@@ -152,10 +152,42 @@
       }
     },
     {
+      "id": 8,
+      "title": "Node Network Throughput",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_network_receive_bytes_total{job=\"integrations/node_exporter\", device!~\"lo|veth.*|cni.*|flannel.*|tunl.*\"}[5m])",
+          "legendFormat": "{{ instance }} rx"
+        },
+        {
+          "refId": "B",
+          "expr": "rate(node_network_transmit_bytes_total{job=\"integrations/node_exporter\", device!~\"lo|veth.*|cni.*|flannel.*|tunl.*\"}[5m])",
+          "legendFormat": "{{ instance }} tx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
       "id": 3,
       "title": "Pod Restarts — Last 24h",
       "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -211,7 +243,7 @@
       "id": 4,
       "title": "Pods Not Running",
       "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -253,7 +285,7 @@
       "id": 5,
       "title": "Recent OOM Events",
       "type": "logs",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 40 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 48 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
