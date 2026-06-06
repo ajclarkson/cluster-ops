@@ -54,10 +54,35 @@ Node memory is shared across all workloads. Before raising any memory limit:
 
 ## Monitoring stack notes
 
-- **alloy-metrics** scrapes kube-state-metrics, cadvisor, kubelet → remote-writes to Mimir
+- **alloy-metrics** scrapes kube-state-metrics, node-exporter, cadvisor, kubelet → remote-writes to Mimir
+- **node-exporter** runs as a DaemonSet (enabled via `telemetryServices.node-exporter.deploy: true` in k8s-monitoring values) — provides `node_filesystem_*`, `node_network_*`, node temp etc.
 - kube-state-metrics series count is the main driver of alloy-metrics WAL memory usage
 - High ReplicaSet count (dead 0-replica RSes from Helm upgrades) inflates series — controlled via `revisionHistoryLimit: 1`
 - Loki backend runs the compactor; node-red has 400-day retention which creates a large backlog — backend needs more memory than other Loki components
+- Home events structured log stream: `{service_name="loki.source.kubernetes.home_events"}` — JSON with event_type, subsystem, location, decision, reason, outputs_result fields promoted as labels
+
+## Grafana Terraform management
+
+Grafana resources are managed in `terraform/grafana/`. Provider: grafana v4. State backend: HTTP (GitLab). Auth via `TF_HTTP_USERNAME` / `TF_HTTP_PASSWORD` env vars.
+
+### Structure
+- `alerts.tf` — `grafana_folder.infra` ("Alerts"), `grafana_rule_group.infra_5m` and `infra_1m`
+- `dashboards.tf` — three `grafana_dashboard` resources at root level (no folder)
+- `notifications.tf` — `grafana_contact_point.clarksons_slack`, `grafana_message_template.rackman_slack`
+- `datasources.tf` — data sources for Mimir and Loki (used by alert rules)
+- `dashboards/` — JSON dashboard definitions
+
+### Dashboards
+- `cluster-health.json` — node memory/CPU %, PVC disk %, pod restarts table, OOM events log
+- `ha-stack-health.json` — HA/z2m/node-red/mosquitto restart stats, container memory, error rates, recent errors
+- `ha-behaviour.json` — home automation decision stats, subsystem activity, decision log, errors; filtered by `$location` and `$subsystem`
+
+### Known gotchas
+- **Loki alert data blocks** need `query_type = "range"` as a top-level HCL attribute (not just inside `model` jsonencode) — otherwise Terraform diffs on every apply
+- **Dashboard datasource UIDs** are hardcoded: Mimir = `cf6z4wiex30u8e`, Loki = `"loki"` (stream label UID)
+- **Dashboard state drift**: if a folder containing Terraform-managed dashboards is deleted in the UI, Grafana deletes the dashboards too. Fix: `terraform state rm grafana_dashboard.<name>` then `terraform apply` to recreate
+- **Contact point provisioning lock**: API-provisioned contact points show "provisioned, cannot be deleted via UI" — delete via Grafana API if needed
+- **Loki datasource name is case-sensitive**: `name = "Loki"` (capital L) in `data "grafana_data_source"` lookups
 
 ## GitLab CLI
 
