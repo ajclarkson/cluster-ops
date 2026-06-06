@@ -100,7 +100,7 @@
           "options": {
             "renameByName": { "Value": "Restarts" }
           }
-        },
+        }
       ],
       "fieldConfig": {
         "defaults": {},
