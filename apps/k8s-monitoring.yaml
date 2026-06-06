@@ -137,6 +137,8 @@ spec:
       destinations:
         - mimir
       collector: alloy-metrics
+      nodeMetrics:
+        enabled: true
 
     telemetryServices:
       kube-state-metrics:
