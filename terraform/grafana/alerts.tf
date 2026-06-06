@@ -25,7 +25,7 @@ resource "grafana_rule_group" "infra_5m" {
       }
       datasource_uid = data.grafana_data_source.mimir.uid
       model = jsonencode({
-        expr          = "(node_memory_MemAvailable_bytes{job=\"integrations/node_exporter\"} / node_memory_MemTotal_bytes{job=\"integrations/node_exporter\"}) * 100"
+        expr          = "(1 - node_memory_working_set_bytes{job=\"integrations/kubernetes/resources\"} / on(node) kube_node_status_capacity{resource=\"memory\"}) * 100"
         intervalMs    = 1000
         maxDataPoints = 43200
         refId         = "A"
