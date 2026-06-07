@@ -9,3 +9,7 @@ resource "grafana_dashboard" "ha_stack_health" {
 resource "grafana_dashboard" "ha_behaviour" {
   config_json = file("${path.module}/dashboards/ha-behaviour.json")
 }
+
+resource "grafana_dashboard" "zigbee_health" {
+  config_json = file("${path.module}/dashboards/zigbee-health.json")
+}

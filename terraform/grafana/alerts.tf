@@ -383,6 +383,146 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
+    name      = "ZigbeeBridgeOffline"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "zigbee2mqtt_bridge_state"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [1], type = "lt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        refId         = "C"
+        type          = "threshold"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+      })
+    }
+
+    no_data_state  = "Alerting"
+    exec_err_state = "Error"
+    for            = "2m"
+    annotations = {
+      summary     = "Zigbee2MQTT bridge is offline"
+      description = "The Zigbee coordinator has disconnected. All Zigbee automations are dead until it reconnects."
+    }
+    is_paused = false
+    notification_settings { contact_point = "Clarksons Slack" }
+  }
+
+  rule {
+    name      = "ZigbeeDeviceOffline"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "count(zigbee2mqtt_device_up == 0)"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [0], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        refId         = "C"
+        type          = "threshold"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "30m"
+    annotations = {
+      summary     = "Zigbee device(s) offline"
+      description = "One or more Zigbee devices have been offline for 30 minutes. Check the Zigbee Health dashboard for which devices are affected."
+    }
+    is_paused = false
+    notification_settings { contact_point = "Clarksons Slack" }
+  }
+
+  rule {
     name      = "NodeNetworkDrops"
     condition = "C"
 
