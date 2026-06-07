@@ -96,6 +96,14 @@ spec:
             }
           }
 
+          prometheus.scrape "flux_kube_state_metrics" {
+            targets = [{__address__ = "flux-kube-state-metrics.k8s-monitoring.svc:8080"}]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "flux-kube-state-metrics"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
           prometheus.scrape "flux_controllers" {
             targets         = discovery.relabel.flux_metrics.output
             metrics_path    = "/metrics"

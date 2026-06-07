@@ -17,7 +17,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "count(gotk_reconcile_condition{type=\"Ready\", status=\"True\"})",
+          "expr": "(count(gotk_kustomization_info{ready=\"True\"}) or vector(0)) + (count(gotk_helmrelease_info{ready=\"True\"}) or vector(0))",
           "instant": true
         }
       ],
@@ -43,7 +43,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "count(gotk_reconcile_condition{type=\"Ready\", status!=\"True\"}) or vector(0)",
+          "expr": "(count(gotk_kustomization_info{ready!=\"True\"}) or vector(0)) + (count(gotk_helmrelease_info{ready!=\"True\"}) or vector(0))",
           "instant": true
         }
       ],
@@ -72,12 +72,12 @@
       "title": "Kustomizations",
       "description": "Flux Kustomization reconciliation state. All should be Ready=True.",
       "type": "table",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
           "refId": "A",
-          "expr": "gotk_reconcile_condition{type=\"Ready\", kind=\"Kustomization\"}",
+          "expr": "gotk_kustomization_info",
           "instant": true,
           "format": "table"
         }
@@ -85,18 +85,18 @@
       "transformations": [
         {
           "id": "filterFieldsByName",
-          "options": { "include": { "names": ["name", "namespace", "status"] } }
+          "options": { "include": { "names": ["name", "namespace", "ready"] } }
         },
         {
           "id": "sortBy",
-          "options": { "fields": [{ "displayName": "status", "desc": false }] }
+          "options": { "fields": [{ "displayName": "ready", "desc": false }] }
         }
       ],
       "fieldConfig": {
         "defaults": {},
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "status" },
+            "matcher": { "id": "byName", "options": "ready" },
             "properties": [
               {
                 "id": "mappings",
@@ -127,12 +127,12 @@
       "title": "Helm Releases",
       "description": "Flux HelmRelease reconciliation state. All should be Ready=True.",
       "type": "table",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 14 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 12 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
           "refId": "A",
-          "expr": "gotk_reconcile_condition{type=\"Ready\", kind=\"HelmRelease\"}",
+          "expr": "gotk_helmrelease_info",
           "instant": true,
           "format": "table"
         }
@@ -140,18 +140,18 @@
       "transformations": [
         {
           "id": "filterFieldsByName",
-          "options": { "include": { "names": ["name", "namespace", "status"] } }
+          "options": { "include": { "names": ["name", "namespace", "ready"] } }
         },
         {
           "id": "sortBy",
-          "options": { "fields": [{ "displayName": "status", "desc": false }] }
+          "options": { "fields": [{ "displayName": "ready", "desc": false }] }
         }
       ],
       "fieldConfig": {
         "defaults": {},
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "status" },
+            "matcher": { "id": "byName", "options": "ready" },
             "properties": [
               {
                 "id": "mappings",

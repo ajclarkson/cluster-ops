@@ -5,6 +5,7 @@ resources:
 - home-assistant.yaml
 - zigbee2mqtt.yaml
 - zigbee2mqtt-exporter.yaml
+- flux-kube-state-metrics.yaml
 - grafana.yaml
 - node-red.yaml
 - influxdb.yaml
