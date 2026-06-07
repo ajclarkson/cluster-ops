@@ -57,6 +57,14 @@ spec:
         controller:
           nodeSelector:
             workload: observability
+        extraConfig: |-
+          prometheus.scrape "zigbee2mqtt_exporter" {
+            targets = [{__address__ = "zigbee2mqtt-exporter.zigbee2mqtt.svc:8087"}]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "zigbee2mqtt"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
 
       alloy-logs:
         presets:

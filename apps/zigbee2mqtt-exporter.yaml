@@ -79,21 +79,3 @@ spec:
   selector:
     app.kubernetes.io/name: zigbee2mqtt-exporter
     app.kubernetes.io/instance: zigbee2mqtt-exporter
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: zigbee2mqtt-exporter
-  namespace: zigbee2mqtt
-  labels:
-    app.kubernetes.io/name: zigbee2mqtt-exporter
-    app.kubernetes.io/instance: zigbee2mqtt-exporter
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: zigbee2mqtt-exporter
-      app.kubernetes.io/instance: zigbee2mqtt-exporter
-  endpoints:
-    - port: metrics
-      path: /metrics
-      interval: 60s
