@@ -1,0 +1,181 @@
+{
+  "title": "Flux Reconciliation Status",
+  "uid": "rackman-flux-status",
+  "description": "Health and sync state of all Flux Kustomizations and HelmReleases",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "1m",
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Resources Ready",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(gotk_reconcile_condition{type=\"Ready\", status=\"True\"})",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Resources Not Ready",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(gotk_reconcile_condition{type=\"Ready\", status!=\"True\"}) or vector(0)",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Kustomizations",
+      "description": "Flux Kustomization reconciliation state. All should be Ready=True.",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "gotk_reconcile_condition{type=\"Ready\", kind=\"Kustomization\"}",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": { "include": { "names": ["name", "namespace", "status"] } }
+        },
+        {
+          "id": "sortBy",
+          "options": { "fields": [{ "displayName": "status", "desc": false }] }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "True":    { "text": "Ready",   "color": "green",  "index": 0 } } },
+                  { "type": "value", "options": { "False":   { "text": "Failed",  "color": "red",    "index": 1 } } },
+                  { "type": "value", "options": { "Unknown": { "text": "Unknown", "color": "yellow", "index": 2 } } }
+                ]
+              },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "custom.width", "value": 120 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "name" },
+            "properties": [{ "id": "custom.width", "value": 300 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "namespace" },
+            "properties": [{ "id": "custom.width", "value": 160 }]
+          }
+        ]
+      },
+      "options": { "footer": { "show": false } }
+    },
+    {
+      "id": 4,
+      "title": "Helm Releases",
+      "description": "Flux HelmRelease reconciliation state. All should be Ready=True.",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "gotk_reconcile_condition{type=\"Ready\", kind=\"HelmRelease\"}",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": { "include": { "names": ["name", "namespace", "status"] } }
+        },
+        {
+          "id": "sortBy",
+          "options": { "fields": [{ "displayName": "status", "desc": false }] }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "True":    { "text": "Ready",   "color": "green",  "index": 0 } } },
+                  { "type": "value", "options": { "False":   { "text": "Failed",  "color": "red",    "index": 1 } } },
+                  { "type": "value", "options": { "Unknown": { "text": "Unknown", "color": "yellow", "index": 2 } } }
+                ]
+              },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "custom.width", "value": 120 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "name" },
+            "properties": [{ "id": "custom.width", "value": 300 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "namespace" },
+            "properties": [{ "id": "custom.width", "value": 160 }]
+          }
+        ]
+      },
+      "options": { "footer": { "show": false } }
+    }
+  ]
+}

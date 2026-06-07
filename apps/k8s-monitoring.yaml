@@ -66,6 +66,19 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          prometheus.scrape "flux_controllers" {
+            targets = [
+              {__address__ = "source-controller.flux-system.svc:9090"},
+              {__address__ = "kustomize-controller.flux-system.svc:8080"},
+              {__address__ = "helm-controller.flux-system.svc:8080"},
+              {__address__ = "notification-controller.flux-system.svc:8080"},
+            ]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "flux-system"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
       alloy-logs:
         presets:
           - filesystem-log-reader
