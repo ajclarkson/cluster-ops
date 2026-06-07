@@ -1,0 +1,99 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt-exporter
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/name: zigbee2mqtt-exporter
+    app.kubernetes.io/instance: zigbee2mqtt-exporter
+spec:
+  revisionHistoryLimit: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zigbee2mqtt-exporter
+      app.kubernetes.io/instance: zigbee2mqtt-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zigbee2mqtt-exporter
+        app.kubernetes.io/instance: zigbee2mqtt-exporter
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: zigbee2mqtt-exporter
+          # ghcr.io/d0ugal/zigbee2mqtt-exporter:latest — pinned to digest 2026-06-07
+          image: ghcr.io/d0ugal/zigbee2mqtt-exporter@sha256:aca1f3fd3a689a153a6e0382db9612aad151e2c19c11001963a47350765b47f7
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: Z2M_EXPORTER_WEBSOCKET_URL
+              value: ws://zigbee2mqtt.zigbee2mqtt.svc:8080/api
+          ports:
+            - name: metrics
+              containerPort: 8087
+              protocol: TCP
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zigbee2mqtt-exporter
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/name: zigbee2mqtt-exporter
+    app.kubernetes.io/instance: zigbee2mqtt-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 8087
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: zigbee2mqtt-exporter
+    app.kubernetes.io/instance: zigbee2mqtt-exporter
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: zigbee2mqtt-exporter
+  namespace: zigbee2mqtt
+  labels:
+    app.kubernetes.io/name: zigbee2mqtt-exporter
+    app.kubernetes.io/instance: zigbee2mqtt-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zigbee2mqtt-exporter
+      app.kubernetes.io/instance: zigbee2mqtt-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
