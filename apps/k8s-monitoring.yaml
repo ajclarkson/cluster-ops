@@ -66,13 +66,38 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          discovery.kubernetes "flux_pods" {
+            role = "pod"
+            namespaces {
+              names = ["flux-system"]
+            }
+          }
+
+          discovery.relabel "flux_metrics" {
+            targets = discovery.kubernetes.flux_pods.targets
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_phase"]
+              regex         = "Running"
+            }
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_label_app"]
+              regex         = "helm-controller|kustomize-controller|source-controller|notification-controller"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_ip"]
+              target_label  = "__address__"
+              regex         = "(.+)"
+              replacement   = "$1:8080"
+            }
+          }
+
           prometheus.scrape "flux_controllers" {
-            targets = [
-              {__address__ = "source-controller.flux-system.svc:9090"},
-              {__address__ = "kustomize-controller.flux-system.svc:8080"},
-              {__address__ = "helm-controller.flux-system.svc:8080"},
-              {__address__ = "notification-controller.flux-system.svc:8080"},
-            ]
+            targets         = discovery.relabel.flux_metrics.output
             metrics_path    = "/metrics"
             scrape_interval = "60s"
             job_name        = "flux-system"
