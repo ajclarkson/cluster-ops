@@ -14,6 +14,10 @@ locals {
       hostname = "ntfy.clarksons.me"
       service  = "http://ntfy.ntfy.svc:80"
     }
+    "grafana" = {
+      hostname = "grafana.clarksons.me"
+      service  = "http://grafana.grafana.svc:80"
+    }
   }
 }
 

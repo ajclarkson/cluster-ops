@@ -70,7 +70,7 @@ spec:
 
     grafana.ini:
       server:
-        root_url: https://grafana.${local_ingress_domain}
+        root_url: https://grafana.${external_ingress_domain}
       users:
         auto_assign_org_role: Admin
       auth:
