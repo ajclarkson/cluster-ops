@@ -610,7 +610,7 @@ resource "grafana_rule_group" "infra_5m" {
       }
       datasource_uid = data.grafana_data_source.mimir.uid
       model = jsonencode({
-        expr          = "count(zigbee2mqtt_device_up == 0)"
+        expr          = "zigbee2mqtt_device_up == 0"
         intervalMs    = 1000
         maxDataPoints = 43200
         refId         = "A"
@@ -643,7 +643,7 @@ resource "grafana_rule_group" "infra_5m" {
       datasource_uid = "__expr__"
       model = jsonencode({
         conditions = [{
-          evaluator = { params = [0], type = "gt" }
+          evaluator = { params = [1], type = "lt" }
           operator  = { type = "and" }
           query     = { params = ["C"] }
           reducer   = { params = [], type = "last" }
@@ -661,8 +661,8 @@ resource "grafana_rule_group" "infra_5m" {
     exec_err_state = "Error"
     for            = "30m"
     annotations = {
-      summary     = "Zigbee device(s) offline"
-      description = "One or more Zigbee devices have been offline for 30 minutes. Check the Zigbee Health dashboard for which devices are affected."
+      summary     = "Zigbee device {{ $labels.device }} offline"
+      description = "{{ $labels.device }} has been offline for 30+ minutes. Check the Zigbee Health dashboard for link quality and battery status."
     }
     is_paused = false
     notification_settings { contact_point = "Clarksons Slack" }
