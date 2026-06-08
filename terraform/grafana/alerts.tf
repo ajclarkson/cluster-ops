@@ -665,7 +665,10 @@ resource "grafana_rule_group" "infra_5m" {
       description = "{{ $labels.device }} has been offline for 30+ minutes. Check the Zigbee Health dashboard for link quality and battery status."
     }
     is_paused = false
-    notification_settings { contact_point = "Clarksons Slack" }
+    notification_settings {
+      contact_point = "Clarksons Slack"
+      group_by      = ["alertname"]
+    }
   }
 
   rule {
