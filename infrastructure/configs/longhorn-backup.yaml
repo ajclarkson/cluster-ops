@@ -16,7 +16,8 @@ metadata:
 spec:
   cron: "0 2 * * *"
   task: backup
-  groups: []
+  groups:
+    - default
   retain: 7
   concurrency: 2
   labels: {}
