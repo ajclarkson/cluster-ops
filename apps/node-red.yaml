@@ -13,8 +13,6 @@ metadata:
     app.kubernetes.io/instance: node-red
     app.kubernetes.io/name: node-red
   annotations:
-    recurring-job.longhorn.io/source: enabled
-    recurring-job.longhorn.io/backup-daily: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

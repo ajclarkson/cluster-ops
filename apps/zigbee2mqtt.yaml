@@ -13,8 +13,6 @@ metadata:
     app.kubernetes.io/instance: zigbee2mqtt
     app.kubernetes.io/name: zigbee2mqtt
   annotations:
-    recurring-job.longhorn.io/source: enabled
-    recurring-job.longhorn.io/backup-daily: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

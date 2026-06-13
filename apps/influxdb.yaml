@@ -56,9 +56,6 @@ spec:
     persistence:
       enabled: true
       size: 8Gi
-      annotations:
-        recurring-job.longhorn.io/source: enabled
-        recurring-job.longhorn.io/backup-daily: enabled
 
     resources:
       requests:
