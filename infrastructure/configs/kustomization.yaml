@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
 - cert-manager.yaml
 - external-secrets.yaml
+- longhorn-backup.yaml
 - plans.yaml
 - keycloak-realm-secrets.yaml

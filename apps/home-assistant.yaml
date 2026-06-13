@@ -13,6 +13,8 @@ metadata:
     app.kubernetes.io/instance: home-assistant
     app.kubernetes.io/name: home-assistant
   annotations:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job.longhorn.io/backup-daily: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

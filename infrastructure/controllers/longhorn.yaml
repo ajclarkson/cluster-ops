@@ -3,6 +3,32 @@ kind: Namespace
 metadata:
   name: longhorn-system
 ---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: longhorn-backblaze-credentials
+  namespace: longhorn-system
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+    template:
+      data:
+        AWS_ACCESS_KEY_ID: "{{ .keyID }}"
+        AWS_SECRET_ACCESS_KEY: "{{ .applicationKey }}"
+        AWS_ENDPOINTS: "https://s3.eu-central-003.backblazeb2.com"
+  data:
+    - secretKey: keyID
+      remoteRef:
+        key: "rackman-backblaze-credentials"
+        property: keyID
+    - secretKey: applicationKey
+      remoteRef:
+        key: "rackman-backblaze-credentials"
+        property: applicationKey
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -38,7 +64,8 @@ spec:
       defaultReplicaCount: 2
       autoSalvage: "true"
       allowVolumeCreationWithDegradedAvailability: "false"
-      backupTarget: ""
+      backupTarget: "s3://rackman-longhorn-backups@eu-central-003/"
+      backupTargetCredentialSecret: "longhorn-backblaze-credentials"
 
     # Ingress settings (as before)
     ingress:
