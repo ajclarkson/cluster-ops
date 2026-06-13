@@ -1,4 +1,14 @@
 apiVersion: longhorn.io/v1beta2
+kind: BackupTarget
+metadata:
+  name: default
+  namespace: longhorn-system
+spec:
+  backupTargetURL: "s3://rackman-longhorn-backups@eu-central-003/"
+  credentialSecret: "longhorn-backblaze-credentials"
+  pollInterval: "5m0s"
+---
+apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
   name: backup-daily
