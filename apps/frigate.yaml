@@ -112,13 +112,16 @@ data:
       alerts:
         retain:
           days: 7
+      detections:
+        retain:
+          days: 7
+
+    review:
+      alerts:
         labels:
           - person
           - cat
           - dog
-      detections:
-        retain:
-          days: 7
 
     snapshots:
       enabled: true
@@ -171,7 +174,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "11"
+        config-version: "12"
     spec:
       affinity:
         nodeAffinity:
