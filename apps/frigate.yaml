@@ -116,17 +116,18 @@ data:
 
     record:
       enabled: true
-      retain:
+      continuous:
         days: 0
       alerts:
+        pre_capture: 5
+        post_capture: 10
         retain:
           days: 7
       detections:
-        retain:
-          days: 7
-      events:
         pre_capture: 5
         post_capture: 10
+        retain:
+          days: 7
 
     review:
       alerts:
@@ -186,7 +187,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "17"
+        config-version: "18"
     spec:
       affinity:
         nodeAffinity:
