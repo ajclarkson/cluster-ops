@@ -149,6 +149,8 @@ spec:
     metadata:
       labels:
         app: frigate
+      annotations:
+        config-version: "2"
     spec:
       affinity:
         nodeAffinity:
