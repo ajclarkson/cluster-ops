@@ -109,6 +109,7 @@ spec:
       automountServiceAccountToken: true
       enableServiceLinks: true
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
 
       # Prefer not to schedule Home Assistant on the observability node(s)
       affinity:
