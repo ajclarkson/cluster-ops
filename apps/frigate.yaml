@@ -34,6 +34,9 @@ data:
     auth:
       enabled: false
 
+    database:
+      path: /media/frigate/frigate.db
+
     mqtt:
       enabled: true
       host: mqtt-mosquitto.mqtt.svc
@@ -164,7 +167,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "9"
+        config-version: "10"
     spec:
       affinity:
         nodeAffinity:
