@@ -39,6 +39,9 @@ data:
       host: mqtt-mosquitto.mqtt.svc
       port: 1883
 
+    ffmpeg:
+      hwaccel_args: preset-vaapi
+
     detectors:
       ov:
         type: openvino
@@ -164,7 +167,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "7"
+        config-version: "8"
     spec:
       affinity:
         nodeAffinity:
