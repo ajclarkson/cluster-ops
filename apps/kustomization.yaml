@@ -17,3 +17,4 @@ resources:
 - mimir.yaml
 - mqtt-events-bridge.yaml
 - ntfy.yaml
+- frigate.yaml

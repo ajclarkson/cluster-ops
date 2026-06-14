@@ -1,0 +1,273 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frigate
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: frigate-tapo-credentials
+  namespace: frigate
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: "frigate-tapo-credentials"
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: "frigate-tapo-credentials"
+        property: password
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frigate-config
+  namespace: frigate
+data:
+  config.yaml: |
+    mqtt:
+      enabled: true
+      host: mqtt-mosquitto.mqtt.svc
+      port: 1883
+
+    detectors:
+      ov:
+        type: openvino
+        device: CPU
+
+    cameras:
+      home_office:
+        ffmpeg:
+          inputs:
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream1
+              roles:
+                - detect
+                - record
+        detect:
+          width: 1920
+          height: 1080
+          fps: 5
+        record:
+          enabled: true
+          retain:
+            days: 3
+            mode: motion
+          events:
+            retain:
+              default: 7
+        snapshots:
+          enabled: true
+          retain:
+            default: 7
+
+      kitchen:
+        ffmpeg:
+          inputs:
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream1
+              roles:
+                - detect
+                - record
+        detect:
+          width: 1920
+          height: 1080
+          fps: 5
+        record:
+          enabled: true
+          retain:
+            days: 3
+            mode: motion
+          events:
+            retain:
+              default: 7
+        snapshots:
+          enabled: true
+          retain:
+            default: 7
+
+      parlour:
+        ffmpeg:
+          inputs:
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream1
+              roles:
+                - detect
+                - record
+        detect:
+          width: 1920
+          height: 1080
+          fps: 5
+        record:
+          enabled: true
+          retain:
+            days: 3
+            mode: motion
+          events:
+            retain:
+              default: 7
+        snapshots:
+          enabled: true
+          retain:
+            default: 7
+
+    record:
+      enabled: true
+      retain:
+        days: 3
+        mode: motion
+
+    snapshots:
+      enabled: true
+
+    objects:
+      track:
+        - person
+        - cat
+        - dog
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-single
+provisioner: driver.longhorn.io
+parameters:
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "2880"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate-data
+  namespace: frigate
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-single
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: frigate
+  namespace: frigate
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: frigate
+  serviceName: frigate
+  template:
+    metadata:
+      labels:
+        app: frigate
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+      securityContext:
+        supplementalGroups:
+          - 44   # video
+          - 992  # render
+      containers:
+        - name: frigate
+          image: ghcr.io/blakeblackshear/frigate:0.17.1
+          env:
+            - name: FRIGATE_TAPO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: frigate-tapo-credentials
+                  key: username
+            - name: FRIGATE_TAPO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: frigate-tapo-credentials
+                  key: password
+          ports:
+            - name: http
+              containerPort: 5000
+            - name: rtsp
+              containerPort: 8554
+          volumeMounts:
+            - name: config
+              mountPath: /config/config.yaml
+              subPath: config.yaml
+            - name: data
+              mountPath: /media/frigate
+            - name: dri
+              mountPath: /dev/dri
+          securityContext:
+            privileged: false
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 500m
+            limits:
+              memory: 2Gi
+              cpu: 2000m
+      volumes:
+        - name: config
+          configMap:
+            name: frigate-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: frigate-data
+        - name: dri
+          hostPath:
+            path: /dev/dri
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frigate
+  namespace: frigate
+spec:
+  type: ClusterIP
+  selector:
+    app: frigate
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+    - name: rtsp
+      port: 8554
+      targetPort: rtsp
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frigate
+  namespace: frigate
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/auth-signin: "${oauth_signin_url}"
+    nginx.ingress.kubernetes.io/auth-url: "${oauth_url}"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: frigate.${local_ingress_domain}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frigate
+                port:
+                  name: http
