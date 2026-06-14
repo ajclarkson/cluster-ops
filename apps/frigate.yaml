@@ -31,6 +31,9 @@ metadata:
   namespace: frigate
 data:
   config.yaml: |
+    auth:
+      enabled: false
+
     mqtt:
       enabled: true
       host: mqtt-mosquitto.mqtt.svc
@@ -161,7 +164,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "6"
+        config-version: "7"
     spec:
       affinity:
         nodeAffinity:
