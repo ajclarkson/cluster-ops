@@ -116,7 +116,8 @@ data:
 
     record:
       enabled: true
-      mode: active_objects
+      retain:
+        days: 0
       alerts:
         retain:
           days: 7
@@ -185,7 +186,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "16"
+        config-version: "17"
     spec:
       affinity:
         nodeAffinity:
