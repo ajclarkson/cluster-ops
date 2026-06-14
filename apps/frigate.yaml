@@ -42,7 +42,7 @@ data:
         device: CPU
 
     model:
-      path: /openvino-model/FP16/ssdlite_mobilenet_v2.xml
+      path: /openvino-model/ssdlite_mobilenet_v2.xml
 
     cameras:
       home_office:
@@ -156,7 +156,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "4"
+        config-version: "5"
     spec:
       affinity:
         nodeAffinity:
