@@ -6,6 +6,10 @@ GitOps management for a 3-node Raspberry Pi 5 (256GB NVMe) k3s homelab cluster. 
 
 **kubectl is read-only.** All changes to cluster state go through git → Flux. Never use kubectl to mutate resources directly.
 
+## Configuration schemas
+
+**Never guess or invent config schemas.** If adding or modifying configuration for any application (Frigate, Helm chart values, Longhorn, etc.), fetch the official documentation or check the source before writing YAML. Schema errors cause pod restarts and config-version churn. When in doubt, use the WebFetch tool to read the relevant docs page first.
+
 ## Architecture
 
 - **Nodes**: `blinky` (10.0.0.51), `inky` (10.0.0.52), `pinky` (10.0.0.53) — 3-master HA with embedded etcd, all run workloads
