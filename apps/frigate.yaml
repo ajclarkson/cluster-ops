@@ -37,9 +37,11 @@ data:
       port: 1883
 
     detectors:
-      cpu:
-        type: cpu
-        num_threads: 4
+      ov:
+        type: openvino
+        device: CPU
+        model:
+          path: /openvino-model/FP16/ssdlite_mobilenet_v2.xml
 
     cameras:
       home_office:
@@ -50,9 +52,10 @@ data:
                 - detect
                 - record
         detect:
+          enabled: true
           width: 1920
           height: 1080
-          fps: 5
+          fps: 2
         record:
           enabled: true
         snapshots:
@@ -66,9 +69,10 @@ data:
                 - detect
                 - record
         detect:
+          enabled: true
           width: 1920
           height: 1080
-          fps: 5
+          fps: 2
         record:
           enabled: true
         snapshots:
@@ -82,9 +86,10 @@ data:
                 - detect
                 - record
         detect:
+          enabled: true
           width: 1920
           height: 1080
-          fps: 5
+          fps: 2
         record:
           enabled: true
         snapshots:
@@ -150,7 +155,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "2"
+        config-version: "3"
     spec:
       affinity:
         nodeAffinity:
