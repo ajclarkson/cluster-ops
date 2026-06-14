@@ -211,6 +211,8 @@ spec:
               mountPath: /media/frigate
             - name: dri
               mountPath: /dev/dri
+            - name: shm
+              mountPath: /dev/shm
           securityContext:
             privileged: false
           resources:
@@ -230,6 +232,10 @@ spec:
         - name: dri
           hostPath:
             path: /dev/dri
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
 ---
 apiVersion: v1
 kind: Service
