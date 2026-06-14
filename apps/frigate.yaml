@@ -89,6 +89,13 @@ data:
           enabled: true
         snapshots:
           enabled: true
+        zones:
+          feeder:
+            coordinates: 0.263,0.29,0.425,0.329,0.428,0.705,0.486,0.791,0.74,0.878,0.742,1,0.231,0.991
+            inertia: 5
+            loitering_time: 5
+            objects:
+              - cat
 
       parlour:
         ffmpeg:
@@ -174,7 +181,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "13"
+        config-version: "14"
     spec:
       affinity:
         nodeAffinity:
