@@ -123,6 +123,9 @@ data:
       detections:
         retain:
           days: 7
+      events:
+        pre_capture: 5
+        post_capture: 10
 
     review:
       alerts:
@@ -182,7 +185,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "15"
+        config-version: "16"
     spec:
       affinity:
         nodeAffinity:
