@@ -37,12 +37,9 @@ data:
       port: 1883
 
     detectors:
-      ov:
-        type: openvino
-        device: CPU
-
-    model:
-      path: /openvino-model/ssdlite_mobilenet_v2.xml
+      cpu:
+        type: cpu
+        num_threads: 4
 
     cameras:
       home_office:
