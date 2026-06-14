@@ -55,16 +55,8 @@ data:
           fps: 5
         record:
           enabled: true
-          retain:
-            days: 3
-            mode: motion
-          events:
-            retain:
-              default: 7
         snapshots:
           enabled: true
-          retain:
-            default: 7
 
       kitchen:
         ffmpeg:
@@ -79,16 +71,8 @@ data:
           fps: 5
         record:
           enabled: true
-          retain:
-            days: 3
-            mode: motion
-          events:
-            retain:
-              default: 7
         snapshots:
           enabled: true
-          retain:
-            default: 7
 
       parlour:
         ffmpeg:
@@ -103,22 +87,17 @@ data:
           fps: 5
         record:
           enabled: true
-          retain:
-            days: 3
-            mode: motion
-          events:
-            retain:
-              default: 7
         snapshots:
           enabled: true
-          retain:
-            default: 7
 
     record:
       enabled: true
-      retain:
-        days: 3
-        mode: motion
+      alerts:
+        retain:
+          days: 7
+      detections:
+        retain:
+          days: 7
 
     snapshots:
       enabled: true
