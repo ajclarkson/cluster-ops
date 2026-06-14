@@ -6,7 +6,7 @@ metadata:
 spec:
   backupTargetURL: "s3://rackman-longhorn-backups@eu-central-003/"
   credentialSecret: "longhorn-backblaze-credentials"
-  pollInterval: "5m0s"
+  pollInterval: "24h0m0s"
 ---
 apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
