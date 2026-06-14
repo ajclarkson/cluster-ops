@@ -41,6 +41,9 @@ data:
         type: openvino
         device: CPU
 
+    model:
+      path: /openvino-model/ssdlite_mobilenet_v2.xml
+
     cameras:
       home_office:
         ffmpeg:
@@ -214,7 +217,7 @@ spec:
         - name: shm
           emptyDir:
             medium: Memory
-            sizeLimit: 256Mi
+            sizeLimit: 512Mi
 ---
 apiVersion: v1
 kind: Service
