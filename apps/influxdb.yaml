@@ -56,6 +56,8 @@ spec:
     persistence:
       enabled: true
       size: 8Gi
+      annotations:
+        recurring-job-group.longhorn.io/critical: enabled
 
     resources:
       requests:

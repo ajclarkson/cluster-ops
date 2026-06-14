@@ -17,7 +17,7 @@ spec:
   cron: "0 2 * * *"
   task: backup
   groups:
-    - default
+    - critical
   retain: 7
   concurrency: 2
   labels: {}

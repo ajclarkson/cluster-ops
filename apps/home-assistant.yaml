@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/instance: home-assistant
     app.kubernetes.io/name: home-assistant
   annotations:
+    recurring-job-group.longhorn.io/critical: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

@@ -443,9 +443,9 @@ resource "grafana_rule_group" "infra_5m" {
 
     no_data_state  = "OK"
     exec_err_state = "Error"
-    for            = "5m"
+    for            = "10m"
     annotations = {
-      summary     = "Kustomization {{ $labels.namespace }}/{{ $labels.name }} not ready for 5+ minutes"
+      summary     = "Kustomization {{ $labels.namespace }}/{{ $labels.name }} not ready for 10+ minutes"
       description = "Kustomization {{ $labels.namespace }}/{{ $labels.name }} has ready={{ $labels.ready }}. Check `flux get kustomization -n {{ $labels.namespace }} {{ $labels.name }}` and recent git changes."
     }
     is_paused = false

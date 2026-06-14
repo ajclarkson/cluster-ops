@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/instance: node-red
     app.kubernetes.io/name: node-red
   annotations:
+    recurring-job-group.longhorn.io/critical: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

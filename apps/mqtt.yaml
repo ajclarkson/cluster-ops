@@ -29,6 +29,8 @@ metadata:
   labels:
     app.kubernetes.io/instance: mqtt
     app.kubernetes.io/name: mosquitto
+  annotations:
+    recurring-job-group.longhorn.io/critical: enabled
 spec:
   accessModes:
     - "ReadWriteOnce"

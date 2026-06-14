@@ -12,7 +12,7 @@
       "id": 1,
       "title": "Node Memory Used %",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -50,7 +50,7 @@
       "id": 2,
       "title": "Node CPU Used %",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -79,7 +79,7 @@
       "id": 7,
       "title": "Node Disk Used %",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -117,7 +117,7 @@
       "id": 6,
       "title": "PVC Disk Used %",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -155,7 +155,7 @@
       "id": 8,
       "title": "Node Network Throughput",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -187,7 +187,7 @@
       "id": 3,
       "title": "Pod Restarts — Last 24h",
       "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -243,7 +243,7 @@
       "id": 4,
       "title": "Pods Not Running",
       "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -285,7 +285,7 @@
       "id": 5,
       "title": "Recent OOM Events",
       "type": "logs",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 48 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -300,6 +300,110 @@
         "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": true
+      }
+    },
+    {
+      "id": 9,
+      "title": "Container Memory % of Limit — Top 10",
+      "description": "Containers closest to their memory limits right now. Red = >90%, yellow = >75%.",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, container_memory_working_set_bytes{container!=\"\", container!=\"POD\"} / on(namespace, pod, container) kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"} * 100)",
+          "instant": true,
+          "format": "table",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": { "include": { "names": ["namespace", "pod", "container", "Value"] } }
+        },
+        {
+          "id": "organize",
+          "options": { "renameByName": { "Value": "Mem % of Limit" } }
+        },
+        {
+          "id": "sortBy",
+          "options": { "fields": [{ "displayName": "Mem % of Limit", "desc": true }] }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Mem % of Limit" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              { "id": "decimals", "value": 1 },
+              { "id": "custom.width", "value": 130 },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 75 },
+                    { "color": "red", "value": 90 }
+                  ]
+                }
+              },
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "namespace" },
+            "properties": [{ "id": "custom.width", "value": 140 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "container" },
+            "properties": [{ "id": "custom.width", "value": 140 }]
+          }
+        ]
+      },
+      "options": { "footer": { "show": false } }
+    },
+    {
+      "id": 10,
+      "title": "Container Memory % of Limit — Known Offenders",
+      "description": "Memory pressure trend for containers with a history of OOM kills: alloy-metrics, loki-backend, longhorn-manager.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(\n  container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"k8s-monitoring|loki|longhorn-system\", container=~\"alloy|loki|longhorn-manager\"}\n  / on(namespace, pod, container)\n  kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"}\n) * 100",
+          "legendFormat": "{{ namespace }}/{{ container }} ({{ pod }})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 75 },
+              { "color": "red", "value": 90 }
+            ]
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "thresholdsStyle": { "mode": "line" }
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
       }
     }
   ]
