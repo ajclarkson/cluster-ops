@@ -61,13 +61,15 @@ data:
           inputs:
             - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream1
               roles:
-                - detect
                 - record
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream2
+              roles:
+                - detect
         detect:
           enabled: true
-          width: 1920
-          height: 1080
-          fps: 2
+          width: 640
+          height: 360
+          fps: 5
         record:
           enabled: true
         snapshots:
@@ -78,13 +80,15 @@ data:
           inputs:
             - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream1
               roles:
-                - detect
                 - record
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream2
+              roles:
+                - detect
         detect:
           enabled: true
-          width: 1920
-          height: 1080
-          fps: 2
+          width: 640
+          height: 360
+          fps: 5
         record:
           enabled: true
         snapshots:
@@ -102,13 +106,15 @@ data:
           inputs:
             - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream1
               roles:
-                - detect
                 - record
+            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream2
+              roles:
+                - detect
         detect:
           enabled: true
-          width: 1920
-          height: 1080
-          fps: 2
+          width: 640
+          height: 360
+          fps: 5
         record:
           enabled: true
         snapshots:
@@ -185,7 +191,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "19"
+        config-version: "20"
     spec:
       affinity:
         nodeAffinity:
