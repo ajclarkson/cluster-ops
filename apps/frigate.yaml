@@ -134,7 +134,6 @@ data:
         labels:
           - person
           - cat
-          - dog
 
     snapshots:
       enabled: true
@@ -143,7 +142,6 @@ data:
       track:
         - person
         - cat
-        - dog
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -187,7 +185,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "18"
+        config-version: "19"
     spec:
       affinity:
         nodeAffinity:
