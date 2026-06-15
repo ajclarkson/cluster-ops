@@ -95,7 +95,7 @@ data:
           enabled: true
         zones:
           feeder:
-            coordinates: 0.263,0.29,0.425,0.329,0.428,0.705,0.486,0.791,0.74,0.878,0.742,1,0.231,0.991
+            coordinates: 0.214,0.279,0.393,0.313,0.4,0.773,0.486,0.791,0.74,0.878,0.742,1,0.154,1
             inertia: 5
             loitering_time: 5
             objects:
@@ -191,7 +191,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "20"
+        config-version: "21"
     spec:
       affinity:
         nodeAffinity:
