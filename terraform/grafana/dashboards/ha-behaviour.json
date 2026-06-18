@@ -101,6 +101,31 @@
         },
         "includeAll": false,
         "hide": 0
+      },
+      {
+        "name": "decision_filter",
+        "type": "custom",
+        "label": "Show",
+        "query": "Changes only : no_change,All : __none__",
+        "options": [
+          {
+            "selected": true,
+            "text": "Changes only",
+            "value": "no_change"
+          },
+          {
+            "selected": false,
+            "text": "All",
+            "value": "__none__"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "Changes only",
+          "value": "no_change"
+        },
+        "includeAll": false,
+        "hide": 0
       }
     ]
   },
@@ -414,7 +439,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} \u2192 {{.decision}} \u00b7 {{.reason}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | line_format \"[{{.location}}] {{.subsystem}} \u2192 {{.decision}} \u00b7 {{.reason}}\"",
           "queryType": "range"
         }
       ],
