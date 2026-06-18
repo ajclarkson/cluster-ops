@@ -147,7 +147,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\"} [24h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\"} | json | decision !~ \"$decision_filter\" [24h]))",
           "queryType": "range"
         }
       ],
@@ -239,7 +239,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"lighting\"} [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"lighting\"} | json | decision !~ \"$decision_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -290,7 +290,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"occupied\"} [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"occupied\"} | json | decision !~ \"$decision_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -341,7 +341,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"sonos\"} [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"sonos\"} | json | decision !~ \"$decision_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -392,7 +392,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} [10m]))",
+          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" [10m]))",
           "legendFormat": "{{ subsystem }}",
           "queryType": "range"
         }
@@ -482,7 +482,7 @@
       }
     },
     {
-      "id": 6,
+      "id": 9,
       "title": "Heating \u2014 active (2h)",
       "type": "stat",
       "gridPos": {
@@ -498,7 +498,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"heating\"} [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"heating\"} | json | decision !~ \"$decision_filter\" [2h]))",
           "queryType": "range"
         }
       ],
