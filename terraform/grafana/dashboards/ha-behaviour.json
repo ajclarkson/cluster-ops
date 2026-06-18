@@ -31,9 +31,10 @@
         "name": "subsystem",
         "type": "custom",
         "label": "Subsystem",
-        "query": ".*,lighting,occupied,sonos",
+        "query": ".*,heating,lighting,occupied,sonos",
         "options": [
           { "selected": true,  "text": "All",      "value": ".*" },
+          { "selected": false, "text": "heating",   "value": "heating" },
           { "selected": false, "text": "lighting",  "value": "lighting" },
           { "selected": false, "text": "occupied",  "value": "occupied" },
           { "selected": false, "text": "sonos",     "value": "sonos" }
