@@ -55,14 +55,31 @@ data:
       path: /openvino-model/ssdlite_mobilenet_v2.xml
       labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
+    go2rtc:
+      streams:
+        home_office:
+          - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream1
+        home_office_sub:
+          - "ffmpeg:home_office#video=h264&width=640&height=360&fps=5"
+        kitchen:
+          - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream1
+        kitchen_sub:
+          - "ffmpeg:kitchen#video=h264&width=640&height=360&fps=5"
+        parlour:
+          - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream1
+        parlour_sub:
+          - "ffmpeg:parlour#video=h264&width=640&height=360&fps=5"
+
     cameras:
       home_office:
         ffmpeg:
           inputs:
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream1
+            - path: rtsp://127.0.0.1:8554/home_office
+              input_args: preset-rtsp-restream
               roles:
                 - record
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream2
+            - path: rtsp://127.0.0.1:8554/home_office_sub
+              input_args: preset-rtsp-restream
               roles:
                 - detect
         detect:
@@ -78,10 +95,12 @@ data:
       kitchen:
         ffmpeg:
           inputs:
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream1
+            - path: rtsp://127.0.0.1:8554/kitchen
+              input_args: preset-rtsp-restream
               roles:
                 - record
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream2
+            - path: rtsp://127.0.0.1:8554/kitchen_sub
+              input_args: preset-rtsp-restream
               roles:
                 - detect
         detect:
@@ -104,10 +123,12 @@ data:
       parlour:
         ffmpeg:
           inputs:
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream1
+            - path: rtsp://127.0.0.1:8554/parlour
+              input_args: preset-rtsp-restream
               roles:
                 - record
-            - path: rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream2
+            - path: rtsp://127.0.0.1:8554/parlour_sub
+              input_args: preset-rtsp-restream
               roles:
                 - detect
         detect:
@@ -191,7 +212,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "21"
+        config-version: "22"
     spec:
       affinity:
         nodeAffinity:
