@@ -60,15 +60,15 @@ data:
         home_office:
           - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.61:554/stream1
         home_office_sub:
-          - "ffmpeg:home_office#video=h264&width=640&height=360&fps=5"
+          - "ffmpeg:home_office#video=h264#width=640#height=360#raw=-r 5"
         kitchen:
           - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.62:554/stream1
         kitchen_sub:
-          - "ffmpeg:kitchen#video=h264&width=640&height=360&fps=5"
+          - "ffmpeg:kitchen#video=h264#width=640#height=360#raw=-r 5"
         parlour:
           - rtsp://{FRIGATE_TAPO_USERNAME}:{FRIGATE_TAPO_PASSWORD}@10.0.0.63:554/stream1
         parlour_sub:
-          - "ffmpeg:parlour#video=h264&width=640&height=360&fps=5"
+          - "ffmpeg:parlour#video=h264#width=640#height=360#raw=-r 5"
 
     cameras:
       home_office:
@@ -212,7 +212,7 @@ spec:
       labels:
         app: frigate
       annotations:
-        config-version: "22"
+        config-version: "23"
     spec:
       affinity:
         nodeAffinity:
