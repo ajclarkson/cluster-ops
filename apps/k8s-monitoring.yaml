@@ -126,7 +126,7 @@ spec:
             limits:
               memory: 256Mi
               cpu: 200m
-        
+
         # Append extra River config to the generated Alloy config
         extraConfig: |-
           // --- HOME EVENTS PIPELINE (ONLY mqtt-events-bridge pods) ---

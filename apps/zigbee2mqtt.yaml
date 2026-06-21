@@ -47,7 +47,7 @@ metadata:
   name: zigbee2mqtt
   namespace: zigbee2mqtt
   annotations:
-    nginx.org/websocket-services: zigbee2mqtt 
+    nginx.org/websocket-services: zigbee2mqtt
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
@@ -93,7 +93,7 @@ spec:
         app.kubernetes.io/name: zigbee2mqtt
         app.kubernetes.io/instance: zigbee2mqtt
     spec:
-      
+
       serviceAccountName: default
       automountServiceAccountToken: true
       dnsPolicy: ClusterFirst

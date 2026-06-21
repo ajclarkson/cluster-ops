@@ -27,14 +27,14 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-      - http01: 
+      - http01:
           ingress:
             class: nginx
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: cloudflare-api-credentials 
+  name: cloudflare-api-credentials
   namespace: cert-manager
 spec:
   secretStoreRef:

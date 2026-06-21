@@ -11,7 +11,7 @@ metadata:
   namespace: mqtt
 data:
   mosquitto.conf: |
-    
+
     # MQTT listener
     listener 1883
     protocol mqtt

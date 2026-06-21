@@ -37,7 +37,7 @@ spec:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: cloudflare-api-credentials 
+  name: cloudflare-api-credentials
   namespace: cert-manager
 spec:
   secretStoreRef:
