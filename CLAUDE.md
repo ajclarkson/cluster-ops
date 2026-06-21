@@ -67,7 +67,7 @@ Node memory is shared across all workloads. Before raising any memory limit:
 
 ## Grafana Terraform management
 
-Grafana resources are managed in `terraform/grafana/`. Provider: grafana v4. State backend: HTTP (GitLab). Auth via `TF_HTTP_USERNAME` / `TF_HTTP_PASSWORD` env vars.
+Grafana resources are managed in `terraform/grafana/`. Provider: grafana v4. State backend: HCP Terraform Cloud (`ajclarkson` org, `grafana` workspace). Auth via `TF_TOKEN_app_terraform_io` env var.
 
 ### Structure
 - `alerts.tf` — `grafana_folder.infra` ("Alerts"), `grafana_rule_group.infra_5m` and `infra_1m`
@@ -88,15 +88,15 @@ Grafana resources are managed in `terraform/grafana/`. Provider: grafana v4. Sta
 - **Contact point provisioning lock**: API-provisioned contact points show "provisioned, cannot be deleted via UI" — delete via Grafana API if needed
 - **Loki datasource name is case-sensitive**: `name = "Loki"` (capital L) in `data "grafana_data_source"` lookups
 
-## GitLab CLI
+## GitHub CLI
 
-`glab` is available for MR review and commenting. The token is in `CLAUDE_GITLAB_TOKEN` but glab reads `GITLAB_TOKEN`, so prefix all commands:
+`gh` is available for PR review and commenting. Token is managed via keyring (`gh auth status` to verify):
 
 ```bash
-GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr list
-GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr view <id>
-GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr diff <id>
-GITLAB_TOKEN=$CLAUDE_GITLAB_TOKEN glab mr note <id> -m "comment"
+gh pr list
+gh pr view <id>
+gh pr diff <id>
+gh pr review <id> --comment -b "comment"
 ```
 
 ## Renovate

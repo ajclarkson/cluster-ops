@@ -119,4 +119,4 @@ SSO via oauth2-proxy (Keycloak + Google IdP) in front of services without native
 
 ## Operational notes
 
-See `CLAUDE.md` for key patterns, gotchas, and runbooks (RWO PVC deadlocks, SSA field ownership conflicts, Mimir ring surgery, etc.).
+Key operational patterns and gotchas (RWO PVC deadlocks, SSA field ownership conflicts, Terraform management, etc.) are documented in `CLAUDE.md` — this doubles as instructions for AI coding assistants working in the repo.
