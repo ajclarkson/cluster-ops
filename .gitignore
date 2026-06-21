@@ -1,0 +1,5 @@
+.DS_Store
+.claude/
+terraform/**/*.tfvars
+terraform/**/*.tfstate
+terraform/**/.terraform/
