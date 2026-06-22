@@ -16,7 +16,7 @@
         "name": "location",
         "type": "custom",
         "label": "Room",
-        "query": ".*,bathroom,bedroom,hallway_downstairs,hallway_upstairs,kitchen,parlour",
+        "query": ".*,bathroom,bedroom,hallway_downstairs,hallway_upstairs,home_office,house,kitchen,parlour",
         "options": [
           {
             "selected": true,
@@ -45,6 +45,16 @@
           },
           {
             "selected": false,
+            "text": "home_office",
+            "value": "home_office"
+          },
+          {
+            "selected": false,
+            "text": "house",
+            "value": "house"
+          },
+          {
+            "selected": false,
             "text": "kitchen",
             "value": "kitchen"
           },
@@ -66,12 +76,17 @@
         "name": "subsystem",
         "type": "custom",
         "label": "Subsystem",
-        "query": ".*,heating,lighting,occupied,sonos",
+        "query": ".*,camera,heating,lighting,occupied,sonos,window_thermal",
         "options": [
           {
             "selected": true,
             "text": "All",
             "value": ".*"
+          },
+          {
+            "selected": false,
+            "text": "camera",
+            "value": "camera"
           },
           {
             "selected": false,
@@ -92,6 +107,11 @@
             "selected": false,
             "text": "sonos",
             "value": "sonos"
+          },
+          {
+            "selected": false,
+            "text": "window_thermal",
+            "value": "window_thermal"
           }
         ],
         "current": {
