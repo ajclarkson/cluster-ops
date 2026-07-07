@@ -1,6 +1,6 @@
 # cluster-ops
 
-GitOps management for a 3-node Raspberry Pi 5 (256GB NVMe) k3s homelab cluster. Flux CD reconciles everything from this repo.
+GitOps management for a 4-node k3s homelab cluster. Flux CD reconciles everything from this repo.
 
 ## Core constraint
 
@@ -12,7 +12,7 @@ GitOps management for a 3-node Raspberry Pi 5 (256GB NVMe) k3s homelab cluster. 
 
 ## Architecture
 
-- **Nodes**: `blinky` (10.0.0.51), `inky` (10.0.0.52), `pinky` (10.0.0.53) — 3-master HA with embedded etcd, all run workloads
+- **Nodes**: `blinky` (10.0.0.51), `inky` (10.0.0.52), `pinky` (10.0.0.53) — RPi 5, control-plane + etcd, all run workloads. `clyde` (10.0.0.54) — BOSGAME E4 (Ryzen 5 3550H, x86_64), worker-only, Frigate workloads
 - **VIP**: kube-vip on `10.0.0.50` (`rackman.local.clarksons.me`), router points DNS to VIP
 - **Storage**: Longhorn (RWO/RWX), 2 replicas, Retain policy. iSCSI loaded via `iscsid` service (no dm_crypt — encryption not in use)
 - **Reconciliation order**: `infra-crds` → `infra-controllers` → `infra-configs` → `apps` → `patches`

@@ -18,3 +18,4 @@ resources:
 - mqtt-events-bridge.yaml
 - ntfy.yaml
 - frigate.yaml
+- homerun.yaml
