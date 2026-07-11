@@ -447,6 +447,143 @@
       }
     },
     {
+      "id": 10,
+      "title": "Homerun migration % (24h)",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", bridge=\"homerun\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "queryType": "range",
+          "hide": true
+        },
+        {
+          "refId": "B",
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "queryType": "range",
+          "hide": true
+        },
+        {
+          "refId": "C",
+          "datasource": {"type": "__expr__", "uid": "__expr__"},
+          "type": "math",
+          "expression": "$A / $B * 100",
+          "hide": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "green", "value": 100}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Decision volume by bridge",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 4,
+        "y": 12
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
+          "legendFormat": "{{ bridge }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {"mode": "multi", "sort": "desc"},
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
+      }
+    },
+    {
+      "id": 12,
+      "title": "Error rate by bridge",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 12
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [10m]))",
+          "legendFormat": "{{ bridge }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {"mode": "multi", "sort": "desc"},
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
+      }
+    },
+    {
       "id": 7,
       "title": "Recent decisions",
       "description": "What the house decided to do and why. Expand any row for full input context.",
@@ -455,7 +592,7 @@
         "h": 14,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 20
       },
       "datasource": {
         "type": "loki",
@@ -485,7 +622,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 34
       },
       "datasource": {
         "type": "loki",
