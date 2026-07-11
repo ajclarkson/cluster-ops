@@ -38,14 +38,14 @@ spec:
                   -R \
                   -v \
                 | while IFS= read -r line; do
-                    topic="${line%% *}"
-                    payload="${line#* }"
-                    case "$topic" in
+                    topic="$${line%% *}"
+                    payload="$${line#* }"
+                    case "$$topic" in
                       home/events)    src="node-red" ;;
                       homerun/events) src="homerun" ;;
                       *)              src="unknown" ;;
                     esac
-                    printf '{"_source":"%s",%s\n' "$src" "${payload#\{}"
+                    printf '{"_source":"%s",%s\n' "$$src" "$${payload#\{}"
                   done;
                 echo "mosquitto_sub exited; restarting in 2s..." >&2
                 sleep 2
