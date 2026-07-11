@@ -16,7 +16,7 @@
         "name": "location",
         "type": "custom",
         "label": "Room",
-        "query": ".*,bathroom,bedroom,hallway_downstairs,hallway_upstairs,home_office,house,kitchen,parlour",
+        "query": ".*,bathroom,bedroom,foreign_office,hallway_downstairs,hallway_upstairs,home_office,house,kitchen,parlour",
         "options": [
           {
             "selected": true,
@@ -32,6 +32,11 @@
             "selected": false,
             "text": "bedroom",
             "value": "bedroom"
+          },
+          {
+            "selected": false,
+            "text": "foreign_office",
+            "value": "foreign_office"
           },
           {
             "selected": false,
@@ -76,7 +81,7 @@
         "name": "subsystem",
         "type": "custom",
         "label": "Subsystem",
-        "query": ".*,camera,heating,hold-sync,lighting,occupied,sonos,window_thermal",
+        "query": ".*,camera,heating,hold_sync,house_mode,lighting,occupied,sonos,window_thermal",
         "options": [
           {
             "selected": true,
@@ -95,8 +100,13 @@
           },
           {
             "selected": false,
-            "text": "hold-sync",
-            "value": "hold-sync"
+            "text": "hold_sync",
+            "value": "hold_sync"
+          },
+          {
+            "selected": false,
+            "text": "house_mode",
+            "value": "house_mode"
           },
           {
             "selected": false,
