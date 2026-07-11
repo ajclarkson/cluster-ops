@@ -966,6 +966,227 @@ resource "grafana_rule_group" "infra_5m" {
       contact_point = "Clarksons Slack"
     }
   }
+
+  rule {
+    name      = "NodeDiskPressure"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "(1 - node_filesystem_avail_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\", fstype!~\"tmpfs|rootfs\"} / node_filesystem_size_bytes{job=\"integrations/node_exporter\", mountpoint=\"/\", fstype!~\"tmpfs|rootfs\"}) * 100"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "max"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [85], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "5m"
+    annotations = {
+      summary     = "Node {{ $labels.instance }} disk {{ printf \"%.1f\" $values.B.Value }}% full"
+      description = "Root filesystem on {{ $labels.instance }} is {{ printf \"%.1f\" $values.B.Value }}% full. At 95% kubelet begins evicting pods."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
+    name      = "LonghornVolumeDegraded"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "longhorn_volume_robustness{robustness=~\"degraded|faulted\"}"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "max"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [0], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "5m"
+    annotations = {
+      summary     = "Longhorn volume {{ $labels.volume }} is {{ $labels.robustness }}"
+      description = "Volume {{ $labels.volume }} has degraded robustness. With 2 replicas, one replica is unavailable — data is at risk if a second failure occurs. Check the Longhorn UI."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
+    name      = "PodFailedMount"
+    condition = "C"
+
+    data {
+      ref_id     = "A"
+      query_type = "range"
+      relative_time_range {
+        from = 600
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.loki.uid
+      model = jsonencode({
+        datasource = { type = "loki", uid = "loki" }
+        editorMode = "code"
+        expr       = "count_over_time({job=\"integrations/kubernetes/eventhandler\", level=\"Warning\", reason=\"FailedMount\"} [10m])"
+        queryType  = "range"
+        refId      = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [0], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "10m"
+    annotations = {
+      summary     = "Pod volume mount failures sustained for 10 minutes"
+      description = "Persistent FailedMount Warning events detected. A pod cannot attach its volume — likely a Longhorn conflict or RWO attach issue. Check `kubectl get events -A --field-selector reason=FailedMount` and the Longhorn UI."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
 }
 
 resource "grafana_rule_group" "infra_1m" {

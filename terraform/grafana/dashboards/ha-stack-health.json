@@ -149,15 +149,50 @@
       }
     },
     {
-      "id": 5,
-      "title": "Container Memory",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "id": 8,
+      "title": "homerun — restarts (24h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (namespace, container) (container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|node-red|mqtt\", container=~\"home-assistant|zigbee2mqtt|node-red|mosquitto\"})",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"homerun\", container=\"homerun\"}[24h]))",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 3 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Container Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (namespace, container) (container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|node-red|mqtt|homerun\", container=~\"home-assistant|zigbee2mqtt|node-red|mosquitto|homerun\"})",
           "legendFormat": "{{ namespace }}"
         }
       ],
@@ -179,7 +214,7 @@
       "id": 6,
       "title": "Error Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -198,6 +233,12 @@
           "refId": "C",
           "expr": "sum(count_over_time({namespace=\"node-red\"} |= \"level=error\" [5m]))",
           "legendFormat": "node-red",
+          "queryType": "range"
+        },
+        {
+          "refId": "D",
+          "expr": "sum(count_over_time({namespace=\"homerun\"} |= \"ERROR\" [5m]))",
+          "legendFormat": "homerun",
           "queryType": "range"
         }
       ],
@@ -221,7 +262,7 @@
       "id": 7,
       "title": "Recent Errors",
       "type": "logs",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -237,6 +278,11 @@
         {
           "refId": "C",
           "expr": "{namespace=\"node-red\"} |= \"level=error\" | line_format \"[node-red] {{__line__}}\"",
+          "queryType": "range"
+        },
+        {
+          "refId": "D",
+          "expr": "{namespace=\"homerun\"} |= \"ERROR\" | line_format \"[homerun] {{__line__}}\"",
           "queryType": "range"
         }
       ],
