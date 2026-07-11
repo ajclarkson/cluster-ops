@@ -21,6 +21,16 @@ spec:
         key: "homeassistant-homerun-token"
         property: token
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homerun-scripts
+  namespace: homerun
+data:
+  reload.sh: |
+    #!/bin/sh
+    wget -q -O /dev/null --post-data='' http://localhost:7070/reload
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -91,10 +101,12 @@ spec:
             - --root=/sync
             - --link=automations
             - --period=60s
-            - --exechook-command=/bin/sh -c 'curl -sf -X POST http://localhost:7070/reload'
+            - --exechook-command=/scripts/reload.sh
           volumeMounts:
             - name: automations
               mountPath: /sync
+            - name: scripts
+              mountPath: /scripts
           securityContext:
             runAsNonRoot: true
             runAsUser: 65533
@@ -106,6 +118,10 @@ spec:
       volumes:
         - name: automations
           emptyDir: {}
+        - name: scripts
+          configMap:
+            name: homerun-scripts
+            defaultMode: 0755
 ---
 apiVersion: v1
 kind: Service
