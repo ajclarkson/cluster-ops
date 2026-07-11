@@ -112,6 +112,38 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          discovery.kubernetes "x509_exporter" {
+            role = "pod"
+            namespaces {
+              names = ["x509-certificate-exporter"]
+            }
+          }
+
+          discovery.relabel "x509_exporter" {
+            targets = discovery.kubernetes.x509_exporter.targets
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_phase"]
+              regex         = "Running"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_ip"]
+              target_label  = "__address__"
+              regex         = "(.+)"
+              replacement   = "$1:9793"
+            }
+          }
+
+          prometheus.scrape "x509_exporter" {
+            targets         = discovery.relabel.x509_exporter.output
+            metrics_path    = "/metrics"
+            scrape_interval = "300s"
+            job_name        = "x509-certificate-exporter"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
       alloy-logs:
         presets:
           - filesystem-log-reader

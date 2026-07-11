@@ -19,3 +19,4 @@ resources:
 - ntfy.yaml
 - frigate.yaml
 - homerun.yaml
+- x509-certificate-exporter.yaml

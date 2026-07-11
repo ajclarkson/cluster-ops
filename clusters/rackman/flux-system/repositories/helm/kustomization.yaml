@@ -11,3 +11,4 @@ resources:
 - minio.yaml
 - cloudnative-pg.yaml
 - oauth2-proxy.yaml
+- enix.yaml

@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: x509-certificate-exporter
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: x509-certificate-exporter
+  namespace: x509-certificate-exporter
+spec:
+  chart:
+    spec:
+      chart: x509-certificate-exporter
+      version: "4.1.0"
+      sourceRef:
+        kind: HelmRepository
+        name: enix
+        namespace: flux-system
+  interval: 15m
+  releaseName: x509-certificate-exporter
+  targetNamespace: x509-certificate-exporter
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: DaemonSet
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 1
+  values:
+    # Only watching node certs — cert-manager handles TLS secret rotation
+    secretsExporter:
+      enabled: false
+
+    # No prometheus-operator in this cluster
+    prometheusServiceMonitor:
+      create: false
+    prometheusRules:
+      create: false
+
+    hostPathsExporter:
+      daemonSets:
+        server:
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: "true"
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          watchFiles:
+            - /var/lib/rancher/k3s/server/tls/server-ca.crt
+            - /var/lib/rancher/k3s/server/tls/client-ca.crt
+            - /var/lib/rancher/k3s/server/tls/request-header-ca.crt
+            - /var/lib/rancher/k3s/server/tls/serving-kube-apiserver.crt
+            - /var/lib/rancher/k3s/server/tls/client-kube-apiserver.crt
+            - /var/lib/rancher/k3s/server/tls/client-controller.crt
+            - /var/lib/rancher/k3s/server/tls/client-scheduler.crt
+            - /var/lib/rancher/k3s/server/tls/client-kube-proxy.crt
+            - /var/lib/rancher/k3s/server/tls/etcd/server-ca.crt
+            - /var/lib/rancher/k3s/server/tls/etcd/peer-ca.crt
+            - /var/lib/rancher/k3s/server/tls/etcd/client-ca.crt
+            - /var/lib/rancher/k3s/server/tls/etcd/server-client.crt
+            - /var/lib/rancher/k3s/server/tls/etcd/peer-server-client.crt
+            - /var/lib/rancher/k3s/agent/client-kubelet.crt
+            - /var/lib/rancher/k3s/agent/serving-kubelet.crt
+          watchKubeconfFiles:
+            - /etc/rancher/k3s/k3s.yaml
+
+        agents:
+          watchFiles:
+            - /var/lib/rancher/k3s/agent/client-kubelet.crt
+            - /var/lib/rancher/k3s/agent/serving-kubelet.crt
+            - /var/lib/rancher/k3s/agent/client-ca.crt
+            - /var/lib/rancher/k3s/agent/server-ca.crt

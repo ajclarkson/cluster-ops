@@ -820,6 +820,79 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
+    name      = "K3sCertificateExpiring"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "(x509_cert_not_after{job=\"x509-certificate-exporter\"} - time()) / 86400"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "min"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [90], type = "lt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "0s"
+    annotations = {
+      summary     = "k3s certificate expiring in {{ printf \"%.0f\" $values.B.Value }} days"
+      description = "One or more k3s control-plane certificates will expire within 90 days. Restart k3s on each control-plane node (rolling) to trigger automatic rotation: sudo systemctl restart k3s. Check the x509-certificate-exporter metrics for the specific certificate."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
     name      = "HomeAssistantErrorSpike"
     condition = "C"
 
