@@ -2,23 +2,23 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: mqtt-events-bridge
+  name: homerun-system-bridge
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mqtt-events-bridge
-  namespace: mqtt-events-bridge
+  name: homerun-system-bridge
+  namespace: homerun-system-bridge
 spec:
   replicas: 1
   revisionHistoryLimit: 1
   selector:
     matchLabels:
-      app: mqtt-events-bridge
+      app: homerun-system-bridge
   template:
     metadata:
       labels:
-        app: mqtt-events-bridge
+        app: homerun-system-bridge
     spec:
       containers:
         - name: mosquitto-sub
@@ -27,13 +27,13 @@ spec:
           command: ["/bin/sh", "-lc"]
           args:
             - |
-              echo "Starting mqtt-events-bridge...";
+              echo "Starting homerun-system-bridge...";
               while true; do
                 mosquitto_sub \
                   -h mqtt-mosquitto.mqtt \
                   -p 1883 \
-                  -t 'home/events' \
-                  -t 'homerun/events' \
+                  -t 'homerun/status' \
+                  -t 'homerun/lifecycle' \
                   -q 0 \
                   -R ;
                 echo "mosquitto_sub exited; restarting in 2s..." >&2
@@ -46,4 +46,3 @@ spec:
             limits:
               cpu: 50m
               memory: 64Mi
-
