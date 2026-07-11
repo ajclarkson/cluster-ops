@@ -106,6 +106,8 @@ spec:
             uid: cf6z4wiex30u8e
             access: proxy
             url: http://mimir-gateway.mimir.svc/prometheus
+            jsonData:
+              manageAlerts: false
 
 ---
 apiVersion: networking.k8s.io/v1
