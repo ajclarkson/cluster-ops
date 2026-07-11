@@ -30,7 +30,7 @@ spec:
               echo "Starting mqtt-events-bridge...";
               while true; do
                 mosquitto_sub \
-                  -h mqtt-mosquitto.mqtt.svc.cluster.local \
+                  -h mqtt-mosquitto.mqtt \
                   -p 1883 \
                   -t 'home/events' \
                   -q 0 \

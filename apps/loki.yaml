@@ -68,7 +68,7 @@ spec:
           ruler: loki-ruler
         s3:
           s3ForcePathStyle: true
-          endpoint: http://minio.minio.svc.cluster.local:9000
+          endpoint: http://minio.minio:9000
           secretAccessKey: ${MINIO_SECRET_ACCESS_KEY}
           accessKeyId: ${MINIO_ACCESS_KEY_ID}
       schemaConfig:

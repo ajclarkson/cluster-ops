@@ -71,9 +71,9 @@ spec:
           imagePullPolicy: Always
           env:
             - name: MQTT_URL
-              value: "mqtt://mqtt-mosquitto.mqtt.svc.cluster.local:1883"
+              value: "mqtt://mqtt-mosquitto.mqtt:1883"
             - name: HA_URL
-              value: "http://home-assistant.home-assistant.svc.cluster.local:8123"
+              value: "http://home-assistant.home-assistant:8123"
             - name: HA_TOKEN
               valueFrom:
                 secretKeyRef:

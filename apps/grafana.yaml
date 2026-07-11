@@ -100,7 +100,7 @@ spec:
             type: loki
             uid: loki
             access: proxy
-            url: http://loki-read-headless.loki.svc.cluster.local:3100
+            url: http://loki-read-headless.loki:3100
           - name: prometheus
             type: prometheus
             uid: cf6z4wiex30u8e
