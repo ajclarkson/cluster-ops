@@ -65,7 +65,7 @@ spec:
             - name: AUTOMATIONS_DIR
               value: /sync/automations
             - name: DRY_RUN
-              value: "true"
+              value: "false"
           livenessProbe:
             httpGet:
               path: /health/live
