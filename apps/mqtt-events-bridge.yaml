@@ -45,7 +45,7 @@ spec:
                       homerun/events) src="homerun" ;;
                       *)              src="unknown" ;;
                     esac
-                    printf '{"_source":"%s",%s\n' "$$src" "$${payload#\{}"
+                    printf '{"_bridge":"%s",%s\n' "$$src" "$${payload#\{}"
                   done;
                 echo "mosquitto_sub exited; restarting in 2s..." >&2
                 sleep 2
