@@ -42,33 +42,16 @@ spec:
         app.kubernetes.io/name: homerun
         app.kubernetes.io/instance: homerun
     spec:
-      shareProcessNamespace: true
       securityContext:
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-        - name: git-sync-init
-          image: registry.k8s.io/git-sync/git-sync:v4.4.0
-          args:
-            - --repo=https://github.com/ajclarkson/homerun-automations
-            - --root=/sync
-            - --link=automations
-            - --one-time
-          volumeMounts:
-            - name: automations
-              mountPath: /sync
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65533
-          resources:
-            requests:
-              memory: "32Mi"
-            limits:
-              memory: "64Mi"
       containers:
         - name: homerun
           image: ghcr.io/ajclarkson/homerun:edge
           imagePullPolicy: Always
+          ports:
+            - containerPort: 7070
+              name: api
           env:
             - name: MQTT_URL
               value: "mqtt://mqtt-mosquitto.mqtt:1883"
@@ -83,6 +66,16 @@ spec:
               value: /sync/automations
             - name: DRY_RUN
               value: "true"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 7070
+            initialDelaySeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 7070
+            initialDelaySeconds: 5
           volumeMounts:
             - name: automations
               mountPath: /sync
@@ -98,6 +91,7 @@ spec:
             - --root=/sync
             - --link=automations
             - --period=60s
+            - --exechook-command=curl -sf -X POST http://localhost:7070/reload
           volumeMounts:
             - name: automations
               mountPath: /sync
@@ -112,3 +106,38 @@ spec:
       volumes:
         - name: automations
           emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homerun
+  namespace: homerun
+spec:
+  selector:
+    app.kubernetes.io/name: homerun
+    app.kubernetes.io/instance: homerun
+  ports:
+    - name: api
+      port: 7070
+      targetPort: api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homerun
+  namespace: homerun
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - homerun.${local_ingress_domain}
+  rules:
+    - host: homerun.${local_ingress_domain}
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: homerun
+                port:
+                  name: api
