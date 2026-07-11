@@ -76,7 +76,7 @@
         "name": "subsystem",
         "type": "custom",
         "label": "Subsystem",
-        "query": ".*,camera,heating,lighting,occupied,sonos,window_thermal",
+        "query": ".*,camera,heating,hold-sync,lighting,occupied,sonos,window_thermal",
         "options": [
           {
             "selected": true,
@@ -92,6 +92,11 @@
             "selected": false,
             "text": "heating",
             "value": "heating"
+          },
+          {
+            "selected": false,
+            "text": "hold-sync",
+            "value": "hold-sync"
           },
           {
             "selected": false,
