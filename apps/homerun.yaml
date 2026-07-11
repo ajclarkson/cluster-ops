@@ -91,7 +91,7 @@ spec:
             - --root=/sync
             - --link=automations
             - --period=60s
-            - --exechook-command=curl -sf -X POST http://localhost:7070/reload
+            - --exechook-command=/bin/sh -c 'curl -sf -X POST http://localhost:7070/reload'
           volumeMounts:
             - name: automations
               mountPath: /sync
