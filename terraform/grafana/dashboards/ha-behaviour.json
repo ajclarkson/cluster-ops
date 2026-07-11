@@ -594,6 +594,47 @@
       }
     },
     {
+      "id": 13,
+      "title": "Loaded automations",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "last_over_time({namespace=\"homerun-system-bridge\"} |= `rescan_complete` | json | unwrap automation_count [1h])",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        }
+      }
+    },
+    {
       "id": 7,
       "title": "Recent decisions",
       "description": "What the house decided to do and why. Expand any row for full input context.",
@@ -602,7 +643,7 @@
         "h": 14,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 26
       },
       "datasource": {
         "type": "loki",
@@ -632,7 +673,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 40
       },
       "datasource": {
         "type": "loki",
