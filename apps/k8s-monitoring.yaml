@@ -144,6 +144,38 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          discovery.kubernetes "reloader" {
+            role = "pod"
+            namespaces {
+              names = ["reloader"]
+            }
+          }
+
+          discovery.relabel "reloader" {
+            targets = discovery.kubernetes.reloader.targets
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_phase"]
+              regex         = "Running"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_ip"]
+              target_label  = "__address__"
+              regex         = "(.+)"
+              replacement   = "$1:9090"
+            }
+          }
+
+          prometheus.scrape "reloader" {
+            targets         = discovery.relabel.reloader.output
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "reloader"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
       alloy-logs:
         presets:
           - filesystem-log-reader
