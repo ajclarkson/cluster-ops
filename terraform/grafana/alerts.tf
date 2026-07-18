@@ -1041,6 +1041,79 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
+    name      = "LonghornBackupStale"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "(time() - longhorn_volume_last_backup_at{job=\"longhorn\"} > 0) / 3600"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "max"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [25], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "OK"
+    for            = "30m"
+    annotations = {
+      summary     = "Longhorn backup stale — {{ printf \"%.0f\" $values.B.Value }}h since last successful backup"
+      description = "One or more Longhorn volumes with backup enabled have not had a successful backup in over 25 hours. Check the Longhorn UI backup targets and Backblaze connectivity."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
     name      = "LonghornVolumeDegraded"
     condition = "C"
 

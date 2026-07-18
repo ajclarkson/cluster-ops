@@ -324,11 +324,51 @@
       }
     },
     {
+      "id": 9,
+      "title": "Longhorn Backup Age",
+      "description": "Hours since last successful backup per volume. Green < 24h, red > 25h.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 50 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(time() - longhorn_volume_last_backup_at{job=\"longhorn\"} > 0) / 3600",
+          "legendFormat": "{{pvc}}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "decimals": 1,
+          "noValue": "no backups",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 24 },
+              { "color": "red", "value": 25 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
       "id": 4,
       "title": "Active Alerts",
       "description": "Currently firing Grafana alerts.",
       "type": "alertlist",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 50 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 54 },
       "options": {
         "alertInstanceLabelFilter": "",
         "alertName": "",

@@ -207,6 +207,44 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          discovery.kubernetes "longhorn_manager" {
+            role = "pod"
+            namespaces {
+              names = ["longhorn-system"]
+            }
+          }
+
+          discovery.relabel "longhorn_manager" {
+            targets = discovery.kubernetes.longhorn_manager.targets
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_phase"]
+              regex         = "Running"
+            }
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_label_app"]
+              regex         = "longhorn-manager"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_ip"]
+              target_label  = "__address__"
+              regex         = "(.+)"
+              replacement   = "$1:9500"
+            }
+          }
+
+          prometheus.scrape "longhorn" {
+            targets         = discovery.relabel.longhorn_manager.output
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "longhorn"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
           prometheus.scrape "coredns" {
             targets = [{__address__ = "kube-dns.kube-system.svc.cluster.local:9153"}]
             metrics_path    = "/metrics"
