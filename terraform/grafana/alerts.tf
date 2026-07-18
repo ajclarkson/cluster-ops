@@ -1187,6 +1187,152 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
+    name      = "CoreDNSErrorRate"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "sum(rate(coredns_dns_responses_total{job=\"coredns\",rcode=\"SERVFAIL\"}[5m])) / sum(rate(coredns_dns_responses_total{job=\"coredns\"}[5m])) * 100"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [10], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "3m"
+    annotations = {
+      summary     = "CoreDNS SERVFAIL rate {{ printf \"%.1f\" $values.B.Value }}% — cluster DNS degraded"
+      description = "More than 10% of DNS responses are SERVFAIL, sustained for 3 minutes. Pod-to-pod DNS resolution is likely broken cluster-wide. Check CoreDNS pod health and resolv.conf on nodes."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
+    name      = "IngressHighErrorRate"
+    condition = "C"
+
+    data {
+      ref_id = "A"
+      relative_time_range {
+        from = 300
+        to   = 0
+      }
+      datasource_uid = data.grafana_data_source.mimir.uid
+      model = jsonencode({
+        expr          = "sum(rate(nginx_ingress_controller_requests{job=\"ingress-nginx\",status=~\"5..\"}[5m]))"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "A"
+      })
+    }
+
+    data {
+      ref_id = "B"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        expression    = "A"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        reducer       = "last"
+        refId         = "B"
+        type          = "reduce"
+      })
+    }
+
+    data {
+      ref_id = "C"
+      relative_time_range {
+        from = 0
+        to   = 0
+      }
+      datasource_uid = "__expr__"
+      model = jsonencode({
+        conditions = [{
+          evaluator = { params = [0.1], type = "gt" }
+          operator  = { type = "and" }
+          query     = { params = ["C"] }
+          reducer   = { params = [], type = "last" }
+          type      = "query"
+        }]
+        expression    = "B"
+        intervalMs    = 1000
+        maxDataPoints = 43200
+        refId         = "C"
+        type          = "threshold"
+      })
+    }
+
+    no_data_state  = "OK"
+    exec_err_state = "OK"
+    for            = "5m"
+    annotations = {
+      summary     = "Ingress 5xx rate {{ printf \"%.2f\" $values.B.Value }}/s — backends returning errors"
+      description = "More than 6 HTTP 5xx errors per minute through ingress-nginx, sustained for 5 minutes. Check the Ingress 5xx panel on the status page to identify which service is affected."
+    }
+    is_paused = false
+
+    notification_settings {
+      contact_point = "Clarksons Slack"
+    }
+  }
+
+  rule {
     name      = "PodFailedMount"
     condition = "C"
 
