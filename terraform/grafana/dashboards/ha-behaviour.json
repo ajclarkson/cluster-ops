@@ -854,14 +854,9 @@
           "unit": "short",
           "decimals": 0,
           "min": 0,
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          },
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 10,
-            "drawStyle": "line",
             "spanNulls": true
           }
         }
