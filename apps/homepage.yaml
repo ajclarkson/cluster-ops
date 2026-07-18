@@ -185,8 +185,7 @@ spec:
             - name: config
               mountPath: /app/config
           livenessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 30
