@@ -22,6 +22,7 @@
     {
       "matchUpdateTypes": ["digest"],
       "automerge": true,
+      "minimumReleaseAge": "0 days",
       "schedule": ["every weekend"]
     },
     {
