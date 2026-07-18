@@ -852,21 +852,22 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "decimals": 0,
           "min": 0,
           "custom": {
             "lineWidth": 2,
-            "fillOpacity": 10,
-            "spanNulls": true
+            "fillOpacity": 10
           }
         }
       },
       "options": {
         "tooltip": {
-          "mode": "single"
+          "mode": "multi",
+          "sort": "desc"
         },
         "legend": {
-          "displayMode": "hidden"
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         }
       }
     },
