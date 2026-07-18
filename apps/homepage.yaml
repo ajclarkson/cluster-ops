@@ -62,6 +62,9 @@ data:
       Infrastructure:
         style: row
         columns: 4
+    providers:
+      longhorn:
+        url: http://longhorn-frontend.longhorn-system.svc
 
   widgets.yaml: |
     - kubernetes:
@@ -76,6 +79,11 @@ data:
           cpu: true
           memory: true
           showLabel: true
+    - longhorn:
+        expanded: true
+        total: true
+        labels: true
+        nodes: true
 
   services.yaml: |
     - Home Automation:
@@ -111,9 +119,6 @@ data:
             href: https://longhorn.${local_ingress_domain}
             description: Distributed storage
             icon: longhorn.svg
-            widget:
-              type: longhorn
-              url: http://longhorn-frontend.longhorn-system.svc
         - Keycloak:
             href: https://sso.${local_ingress_domain}
             description: Identity provider
