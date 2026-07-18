@@ -4,7 +4,7 @@
   "description": "What the house is doing and why",
   "timezone": "browser",
   "schemaVersion": 38,
-  "refresh": "1m",
+  "refresh": "5m",
   "time": {
     "from": "now-24h",
     "to": "now"
@@ -182,8 +182,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
-          "queryType": "range"
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
+          "queryType": "instant"
         }
       ],
       "options": {
@@ -223,8 +223,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [24h]))",
-          "queryType": "range"
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [$__range]))",
+          "queryType": "instant"
         }
       ],
       "options": {
@@ -259,7 +259,7 @@
     },
     {
       "id": 3,
-      "title": "Lighting \u2014 active (2h)",
+      "title": "Lighting — active (2h)",
       "type": "stat",
       "gridPos": {
         "h": 4,
@@ -310,7 +310,7 @@
     },
     {
       "id": 4,
-      "title": "Occupancy \u2014 active (2h)",
+      "title": "Occupancy — active (2h)",
       "type": "stat",
       "gridPos": {
         "h": 4,
@@ -361,7 +361,7 @@
     },
     {
       "id": 5,
-      "title": "Sonos \u2014 active (2h)",
+      "title": "Sonos — active (2h)",
       "type": "stat",
       "gridPos": {
         "h": 4,
@@ -411,292 +411,8 @@
       }
     },
     {
-      "id": 6,
-      "title": "Decision rate by subsystem",
-      "type": "timeseries",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 4
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
-          "legendFormat": "{{ subsystem }}",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": 0,
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "drawStyle": "bars",
-            "barAlignment": 0
-          }
-        }
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        }
-      }
-    },
-    {
-      "id": 10,
-      "title": "Homerun migration % (24h)",
-      "type": "stat",
-      "gridPos": {
-        "h": 8,
-        "w": 4,
-        "x": 0,
-        "y": 12
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", bridge=\"homerun\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
-          "queryType": "range",
-          "hide": true
-        },
-        {
-          "refId": "B",
-          "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
-          "queryType": "range",
-          "hide": true
-        },
-        {
-          "refId": "C",
-          "datasource": {"type": "__expr__", "uid": "__expr__"},
-          "type": "math",
-          "expression": "$A / $B * 100",
-          "hide": false
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "background",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "decimals": 1,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {"color": "blue", "value": null},
-              {"color": "green", "value": 100}
-            ]
-          }
-        }
-      }
-    },
-    {
-      "id": 11,
-      "title": "Decision volume by bridge",
-      "type": "timeseries",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 4,
-        "y": 12
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
-          "legendFormat": "{{ bridge }}",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": 0,
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "drawStyle": "bars",
-            "barAlignment": 0
-          }
-        }
-      },
-      "options": {
-        "tooltip": {"mode": "multi", "sort": "desc"},
-        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
-      }
-    },
-    {
-      "id": 12,
-      "title": "Error rate by bridge",
-      "type": "timeseries",
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 12
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [10m]))",
-          "legendFormat": "{{ bridge }}",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": 0,
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "drawStyle": "bars",
-            "barAlignment": 0
-          }
-        }
-      },
-      "options": {
-        "tooltip": {"mode": "multi", "sort": "desc"},
-        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
-      }
-    },
-    {
-      "id": 13,
-      "title": "Loaded automations",
-      "type": "stat",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 20
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "last_over_time({namespace=\"homerun-system-bridge\"} |= `rescan_complete` | json | unwrap automation_count [1h])",
-          "queryType": "instant"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "background",
-        "graphMode": "none",
-        "orientation": "horizontal"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          }
-        }
-      }
-    },
-    {
-      "id": 7,
-      "title": "Recent decisions",
-      "description": "What the house decided to do and why. Expand any row for full input context.",
-      "type": "logs",
-      "gridPos": {
-        "h": 14,
-        "w": 24,
-        "x": 0,
-        "y": 26
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" | line_format \"[{{.location}}] {{.subsystem}} \u2192 {{.decision}} \u00b7 {{.reason}}\"",
-          "queryType": "range"
-        }
-      ],
-      "options": {
-        "dedupStrategy": "none",
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      }
-    },
-    {
-      "id": 8,
-      "title": "Automation errors",
-      "description": "Action results where outputs.result = error. Should be empty in normal operation.",
-      "type": "logs",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 40
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} \u2192 {{.decision}} ({{.reason}}) \u2014 {{.outputs_action}}\"",
-          "queryType": "range"
-        }
-      ],
-      "options": {
-        "dedupStrategy": "none",
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
-      }
-    },
-    {
       "id": 9,
-      "title": "Heating \u2014 active (2h)",
+      "title": "Heating — active (2h)",
       "type": "stat",
       "gridPos": {
         "h": 4,
@@ -743,6 +459,472 @@
             ]
           }
         }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Decision rate by subsystem",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
+          "legendFormat": "{{ subsystem }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Pipeline runs by location",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cf6z4wiex30u8e"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (location) (rate(homerun_pipeline_runs_total{location=~\"$location\"}[5m]))",
+          "legendFormat": "{{ location }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Action success rate",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cf6z4wiex30u8e"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(homerun_actions_succeeded_total{location=~\"$location\"}[1h])) / sum(rate(homerun_actions_dispatched_total{location=~\"$location\"}[1h])) * 100",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "—",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 90},
+              {"color": "green", "value": 99}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 16,
+      "title": "HA event ingestion rate",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 4,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cf6z4wiex30u8e"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(homerun_ha_events_received_total[5m])",
+          "legendFormat": "{{ event_type }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 17,
+      "title": "Action duration p95",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 14,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cf6z4wiex30u8e"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (action_type, le) (rate(homerun_action_duration_seconds_bucket{location=~\"$location\"}[5m])))",
+          "legendFormat": "{{ action_type }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Homerun migration % (24h)",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", bridge=\"homerun\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
+          "queryType": "instant",
+          "hide": true
+        },
+        {
+          "refId": "B",
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
+          "queryType": "instant",
+          "hide": true
+        },
+        {
+          "refId": "C",
+          "datasource": {"type": "__expr__", "uid": "__expr__"},
+          "type": "math",
+          "expression": "$A / $B * 100",
+          "hide": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "green", "value": 100}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Decision volume by bridge",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 4,
+        "y": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
+          "legendFormat": "{{ bridge }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {"mode": "multi", "sort": "desc"},
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
+      }
+    },
+    {
+      "id": 12,
+      "title": "Error rate by bridge",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (bridge) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [10m]))",
+          "legendFormat": "{{ bridge }}",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {"mode": "multi", "sort": "desc"},
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}
+      }
+    },
+    {
+      "id": 13,
+      "title": "Loaded automations",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "last_over_time({namespace=\"homerun-system-bridge\"} |= `rescan_complete` | json | unwrap automation_count [1h])",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Recent decisions",
+      "description": "What the house decided to do and why. Expand any row for full input context.",
+      "type": "logs",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    },
+    {
+      "id": 8,
+      "title": "Automation errors",
+      "description": "Action results where outputs.result = error. Should be empty in normal operation.",
+      "type": "logs",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} ({{.reason}}) — {{.outputs_action}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
       }
     }
   ]
