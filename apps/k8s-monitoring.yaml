@@ -171,9 +171,9 @@ spec:
           // Blackbox probes — http_200 targets (no oauth2-proxy)
           prometheus.scrape "blackbox_200" {
             targets = [
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://home.local.clarksons.me/", __param_module = "http_200", instance = "home-assistant"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://minio.local.clarksons.me/", __param_module = "http_200", instance = "minio"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://influxdb.local.clarksons.me/", __param_module = "http_200", instance = "influxdb"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://home.local.clarksons.me/", __param_module = "http_200", instance = "home-assistant"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://minio.local.clarksons.me/", __param_module = "http_200", instance = "minio"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://influxdb.local.clarksons.me/", __param_module = "http_200", instance = "influxdb"},
             ]
             metrics_path    = "/probe"
             scrape_interval = "60s"
@@ -184,14 +184,14 @@ spec:
           // Blackbox probes — http_302 targets (behind oauth2-proxy)
           prometheus.scrape "blackbox_302" {
             targets = [
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://hub.local.clarksons.me/", __param_module = "http_302", instance = "zigbee2mqtt"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://red.local.clarksons.me/", __param_module = "http_302", instance = "node-red"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://frigate.local.clarksons.me/", __param_module = "http_302", instance = "frigate"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://grafana.local.clarksons.me/", __param_module = "http_302", instance = "grafana"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://goldilocks.local.clarksons.me/", __param_module = "http_302", instance = "goldilocks"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://longhorn.local.clarksons.me/", __param_module = "http_302", instance = "longhorn"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://sso.local.clarksons.me/", __param_module = "http_302", instance = "keycloak"},
-              {__address__ = "blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://status.local.clarksons.me/", __param_module = "http_302", instance = "homepage"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://hub.local.clarksons.me/", __param_module = "http_302", instance = "zigbee2mqtt"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://red.local.clarksons.me/", __param_module = "http_302", instance = "node-red"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://frigate.local.clarksons.me/", __param_module = "http_302", instance = "frigate"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://grafana.local.clarksons.me/", __param_module = "http_302", instance = "grafana"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://goldilocks.local.clarksons.me/", __param_module = "http_302", instance = "goldilocks"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://longhorn.local.clarksons.me/", __param_module = "http_302", instance = "longhorn"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://sso.local.clarksons.me/", __param_module = "http_302", instance = "keycloak"},
+              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://status.local.clarksons.me/", __param_module = "http_302", instance = "homepage"},
             ]
             metrics_path    = "/probe"
             scrape_interval = "60s"
