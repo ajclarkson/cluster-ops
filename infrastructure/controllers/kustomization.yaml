@@ -12,3 +12,4 @@ resources:
 - cloudflare-tunnel.yaml
 - vpa.yaml
 - reloader.yaml
+- blackbox-exporter.yaml
