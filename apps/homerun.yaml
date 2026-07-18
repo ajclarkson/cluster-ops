@@ -42,6 +42,9 @@ data:
     automations:
       dir: /sync/automations
 
+    metrics:
+      enabled: true
+
     options:
       dry_run: false
 ---

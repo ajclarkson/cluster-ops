@@ -207,6 +207,14 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          prometheus.scrape "homerun" {
+            targets         = [{__address__ = "homerun.homerun.svc:7070"}]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "homerun"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
       alloy-logs:
         presets:
           - filesystem-log-reader

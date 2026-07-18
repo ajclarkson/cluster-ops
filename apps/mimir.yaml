@@ -83,7 +83,7 @@ spec:
           ingestion_burst_size: 100000
           max_label_names_per_series: 120
           max_global_series_per_user: 1000000
-          compactor_blocks_retention_period: 24h
+          compactor_blocks_retention_period: 720h
 
     ingester:
       replicas: 1
