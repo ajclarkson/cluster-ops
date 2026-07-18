@@ -17,3 +17,7 @@ resource "grafana_dashboard" "zigbee_health" {
 resource "grafana_dashboard" "flux_status" {
   config_json = file("${path.module}/dashboards/flux-status.json")
 }
+
+resource "grafana_dashboard" "status_page" {
+  config_json = file("${path.module}/dashboards/status-page.json")
+}
