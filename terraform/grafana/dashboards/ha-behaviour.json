@@ -862,7 +862,7 @@
             "lineWidth": 2,
             "fillOpacity": 10,
             "drawStyle": "line",
-            "spanNulls": false
+            "spanNulls": true
           }
         }
       },
