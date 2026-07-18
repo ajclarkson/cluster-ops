@@ -182,8 +182,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
-          "queryType": "instant"
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "queryType": "range"
         }
       ],
       "options": {
@@ -223,8 +223,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [$__range]))",
-          "queryType": "instant"
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [24h]))",
+          "queryType": "range"
         }
       ],
       "options": {
@@ -707,15 +707,15 @@
         {
           "refId": "A",
           "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", bridge=\"homerun\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
-          "queryType": "instant",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", bridge=\"homerun\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "queryType": "range",
           "hide": true
         },
         {
           "refId": "B",
           "datasource": {"type": "loki", "uid": "loki"},
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [$__range]))",
-          "queryType": "instant",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "queryType": "range",
           "hide": true
         },
         {
