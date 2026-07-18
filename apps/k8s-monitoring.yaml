@@ -97,7 +97,7 @@ spec:
           }
 
           prometheus.scrape "flux_kube_state_metrics" {
-            targets = [{__address__ = "flux-kube-state-metrics.k8s-monitoring.svc:8080"}]
+            targets = [{__address__ = "flux-kube-state-metrics.k8s-monitoring.svc.cluster.local:8080"}]
             metrics_path    = "/metrics"
             scrape_interval = "60s"
             job_name        = "flux-kube-state-metrics"
