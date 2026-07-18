@@ -18,9 +18,10 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "probe_success{job=\"blackbox\"}",
+          "expr": "min_over_time(probe_success{job=\"blackbox\"}[$__interval])",
           "legendFormat": "{{instance}}",
-          "instant": false
+          "instant": false,
+          "queryType": "range"
         }
       ],
       "fieldConfig": {
@@ -108,9 +109,10 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "kube_node_status_condition{condition=\"Ready\",status=\"true\"}",
+          "expr": "min_over_time(kube_node_status_condition{condition=\"Ready\",status=\"true\"}[$__interval])",
           "legendFormat": "{{node}}",
-          "instant": false
+          "instant": false,
+          "queryType": "range"
         }
       ],
       "fieldConfig": {
