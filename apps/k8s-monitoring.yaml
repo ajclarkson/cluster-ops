@@ -207,6 +207,52 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          prometheus.scrape "coredns" {
+            targets = [{__address__ = "kube-dns.kube-system.svc.cluster.local:9153"}]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "coredns"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
+          discovery.kubernetes "ingress_nginx" {
+            role = "pod"
+            namespaces {
+              names = ["ingress-nginx"]
+            }
+          }
+
+          discovery.relabel "ingress_nginx" {
+            targets = discovery.kubernetes.ingress_nginx.targets
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_phase"]
+              regex         = "Running"
+            }
+
+            rule {
+              action        = "keep"
+              source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+              regex         = "ingress-nginx"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_ip"]
+              target_label  = "__address__"
+              regex         = "(.+)"
+              replacement   = "$1:10254"
+            }
+          }
+
+          prometheus.scrape "ingress_nginx" {
+            targets         = discovery.relabel.ingress_nginx.output
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "ingress-nginx"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
           prometheus.scrape "homerun" {
             targets         = [{__address__ = "homerun.homerun.svc:7070"}]
             metrics_path    = "/metrics"
