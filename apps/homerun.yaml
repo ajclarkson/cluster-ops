@@ -7,7 +7,7 @@ metadata:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: homerun-ha-token
+  name: homerun-secrets-file
   namespace: homerun
 spec:
   secretStoreRef:
@@ -15,11 +15,35 @@ spec:
     name: "${onepassword_vault_name}"
   target:
     creationPolicy: Owner
+    template:
+      data:
+        secrets.yaml: |
+          ha_token: {{ .token }}
   data:
     - secretKey: token
       remoteRef:
         key: "homeassistant-homerun-token"
         property: token
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homerun-config
+  namespace: homerun
+data:
+  configuration.yaml: |
+    homeassistant:
+      url: http://home-assistant.home-assistant:8123
+      token: !secret ha_token
+
+    mqtt:
+      url: mqtt://mqtt-mosquitto.mqtt:1883
+
+    automations:
+      dir: /sync/automations
+
+    options:
+      dry_run: false
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -53,19 +77,8 @@ spec:
             - containerPort: 7070
               name: api
           env:
-            - name: MQTT_URL
-              value: "mqtt://mqtt-mosquitto.mqtt:1883"
-            - name: HA_URL
-              value: "http://home-assistant.home-assistant:8123"
-            - name: HA_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: homerun-ha-token
-                  key: token
-            - name: AUTOMATIONS_DIR
-              value: /sync/automations
-            - name: DRY_RUN
-              value: "false"
+            - name: HOMERUN_CONFIG
+              value: /config/configuration.yaml
           livenessProbe:
             httpGet:
               path: /health/live
@@ -79,6 +92,14 @@ spec:
           volumeMounts:
             - name: automations
               mountPath: /sync
+            - name: config
+              mountPath: /config/configuration.yaml
+              subPath: configuration.yaml
+              readOnly: true
+            - name: secrets
+              mountPath: /config/secrets.yaml
+              subPath: secrets.yaml
+              readOnly: true
           resources:
             requests:
               memory: "128Mi"
@@ -106,6 +127,12 @@ spec:
       volumes:
         - name: automations
           emptyDir: {}
+        - name: config
+          configMap:
+            name: homerun-config
+        - name: secrets
+          secret:
+            secretName: homerun-secrets-file
 ---
 apiVersion: v1
 kind: Service
