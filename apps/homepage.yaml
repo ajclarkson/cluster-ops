@@ -78,7 +78,7 @@ spec:
       services:
         - Home Automation:
             - Home Assistant:
-                href: https://home.local.${local_ingress_domain}
+                href: https://home.${local_ingress_domain}
                 description: Home automation hub
                 icon: home-assistant.svg
             - Zigbee2MQTT:
