@@ -10,3 +10,4 @@ resources:
 - keycloak-operator/
 - system-upgrade.yaml
 - cloudflare-tunnel.yaml
+- vpa.yaml
