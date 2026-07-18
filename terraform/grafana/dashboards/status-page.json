@@ -18,10 +18,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "min_over_time(probe_success{job=\"blackbox\"}[$__interval])",
+          "expr": "probe_success{job=\"blackbox\"}",
           "legendFormat": "{{instance}}",
           "instant": false,
-          "queryType": "range"
+          "queryType": "range",
+          "interval": "2m"
         }
       ],
       "fieldConfig": {
@@ -109,10 +110,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "min_over_time(kube_node_status_condition{condition=\"Ready\",status=\"true\"}[$__interval])",
+          "expr": "max by (node) (kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
           "legendFormat": "{{node}}",
           "instant": false,
-          "queryType": "range"
+          "queryType": "range",
+          "interval": "5m"
         }
       ],
       "fieldConfig": {
@@ -150,11 +152,183 @@
       }
     },
     {
+      "id": 5,
+      "title": "Flux GitOps Health",
+      "description": "HelmRelease and Kustomization ready state over time. Green = reconciling OK, red = failing.",
+      "type": "status-history",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max by (name, namespace) (gotk_helmrelease_info{ready=\"True\"}) or (max by (name, namespace) (gotk_helmrelease_info) * 0)",
+          "legendFormat": "HR: {{namespace}}/{{name}}",
+          "instant": false,
+          "queryType": "range",
+          "interval": "5m"
+        },
+        {
+          "refId": "B",
+          "expr": "max by (name, namespace) (gotk_kustomization_info{ready=\"True\"}) or (max by (name, namespace) (gotk_kustomization_info) * 0)",
+          "legendFormat": "KS: {{name}}",
+          "instant": false,
+          "queryType": "range",
+          "interval": "5m"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "FAILING", "color": "red" },
+                "1": { "text": "OK", "color": "green" }
+              }
+            }
+          ],
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "colWidth": 0.9,
+        "showValue": "never",
+        "rowHeight": 0.8,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "tooltip": { "mode": "single" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Unready Pods — Infrastructure",
+      "description": "Count of pods not in Ready state across key infrastructure namespaces. Green = all clear.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kube_pod_status_ready{condition=\"false\", namespace=~\"mimir|loki|longhorn-system|flux-system|k8s-monitoring|homepage|reloader|vpa|goldilocks|blackbox-exporter|home-assistant|zigbee2mqtt|node-red|influxdb|keycloak\"} == 1) or vector(0)",
+          "legendFormat": "Unready pods",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 7,
+      "title": "CoreDNS Error Rate",
+      "description": "SERVFAIL responses per second. Any sustained non-zero value means DNS resolution is failing cluster-wide.",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(coredns_dns_responses_total{job=\"coredns\", rcode=\"SERVFAIL\"}[5m]))",
+          "legendFormat": "SERVFAIL/s"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(coredns_forward_requests_failed_total{job=\"coredns\"}[5m]))",
+          "legendFormat": "upstream failures/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0,
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0.1 }
+            ]
+          },
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": false
+          }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Ingress 5xx Error Rate",
+      "description": "HTTP 5xx responses per second through ingress-nginx, by ingress. Any non-zero value means backend errors are reaching clients.",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (ingress) (rate(nginx_ingress_controller_requests{job=\"ingress-nginx\", status=~\"5..\"}[5m]))",
+          "legendFormat": "{{ingress}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": false
+          }
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
       "id": 4,
       "title": "Active Alerts",
       "description": "Currently firing Grafana alerts.",
       "type": "alertlist",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 50 },
       "options": {
         "alertInstanceLabelFilter": "",
         "alertName": "",
