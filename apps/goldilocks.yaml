@@ -36,6 +36,7 @@ spec:
         on-by-default: true
 
     dashboard:
+      replicaCount: 1
       ingress:
         enabled: true
         ingressClassName: nginx
