@@ -464,6 +464,55 @@
         "sortOrder": "Descending",
         "wrapLogMessage": true
       }
+    },
+    {
+      "id": 13,
+      "title": "Reloader — Rollouts Triggered",
+      "description": "Counts of pod rollouts triggered by Reloader when a Secret or ConfigMap data hash changed.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 62 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "increase(reloader_reload_executed_total{success=\"true\"}[$__interval])",
+          "legendFormat": "success"
+        },
+        {
+          "refId": "B",
+          "expr": "increase(reloader_reload_executed_total{success=\"false\"}[$__interval])",
+          "legendFormat": "failed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "failed" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "success" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
     }
   ]
 }

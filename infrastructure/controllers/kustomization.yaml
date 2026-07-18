@@ -11,3 +11,4 @@ resources:
 - system-upgrade.yaml
 - cloudflare-tunnel.yaml
 - vpa.yaml
+- reloader.yaml
