@@ -23,6 +23,7 @@ spec:
   targetNamespace: reloader
   values:
     reloader:
+      autoReloadAll: true
       podMonitor:
         enabled: true
       enableMetricsByNamespace: true
