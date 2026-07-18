@@ -47,6 +47,10 @@ spec:
           - hosts:
               - status.${local_ingress_domain}
 
+    env:
+      - name: HOMEPAGE_ALLOWED_HOSTS
+        value: "status.${local_ingress_domain}"
+
     config:
       settings:
         title: Rackman
@@ -109,6 +113,9 @@ spec:
                 href: https://longhorn.${local_ingress_domain}
                 description: Distributed storage
                 icon: longhorn.svg
+                widget:
+                  type: longhorn
+                  url: http://longhorn-frontend.longhorn-system.svc
             - Keycloak:
                 href: https://sso.${local_ingress_domain}
                 description: Identity provider
