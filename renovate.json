@@ -20,6 +20,11 @@
       "labels": ["patch"]
     },
     {
+      "matchUpdateTypes": ["digest"],
+      "automerge": true,
+      "schedule": ["every weekend"]
+    },
+    {
       "matchPackageNames": [
         "ghcr.io/home-assistant/home-assistant",
         "eclipse-mosquitto",
@@ -30,6 +35,24 @@
       "groupName": "home automation",
       "automerge": false,
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "matchPackageNames": [
+        "fluxcd/flux2",
+        "cert-manager",
+        "cloudflare/cloudflared",
+        "binwiederhier/ntfy",
+        "k8s-monitoring",
+        "external-secrets",
+        "cloudnative-pg",
+        "oauth2-proxy",
+        "ghcr.io/d0ugal/zigbee2mqtt-exporter"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "infra tools",
+      "automerge": true,
+      "minimumReleaseAge": "5 days",
+      "schedule": ["every weekend"]
     },
     {
       "matchUpdateTypes": ["patch"],
