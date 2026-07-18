@@ -333,7 +333,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "(time() - longhorn_volume_last_backup_at{job=\"longhorn\"} > 0) / 3600",
+          "expr": "(time() - (longhorn_volume_last_backup_at{job=\"longhorn\"} > 0)) / 3600",
           "legendFormat": "{{pvc}}",
           "instant": true
         }

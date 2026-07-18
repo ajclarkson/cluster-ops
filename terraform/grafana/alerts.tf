@@ -1052,7 +1052,7 @@ resource "grafana_rule_group" "infra_5m" {
       }
       datasource_uid = data.grafana_data_source.mimir.uid
       model = jsonencode({
-        expr          = "(time() - longhorn_volume_last_backup_at{job=\"longhorn\"} > 0) / 3600"
+        expr          = "(time() - (longhorn_volume_last_backup_at{job=\"longhorn\"} > 0)) / 3600"
         intervalMs    = 1000
         maxDataPoints = 43200
         refId         = "A"
