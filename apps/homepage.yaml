@@ -4,130 +4,218 @@ kind: Namespace
 metadata:
   name: homepage
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage
+  namespace: homepage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+rules:
+  - apiGroups: [""]
+    resources: [namespaces, pods, nodes, services]
+    verbs: [get, list]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets, replicasets]
+    verbs: [get, list]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses]
+    verbs: [get, list]
+  - apiGroups: [metrics.k8s.io]
+    resources: [nodes, pods]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: homepage
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  kubernetes.yaml: |
+    mode: cluster
+
+  settings.yaml: |
+    title: Rackman
+    layout:
+      Home Automation:
+        style: row
+        columns: 4
+      Observability:
+        style: row
+        columns: 4
+      Infrastructure:
+        style: row
+        columns: 4
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: rackman
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+
+  services.yaml: |
+    - Home Automation:
+        - Home Assistant:
+            href: https://home.${local_ingress_domain}
+            description: Home automation hub
+            icon: home-assistant.svg
+        - Zigbee2MQTT:
+            href: https://hub.${local_ingress_domain}
+            description: Zigbee coordinator
+            icon: zigbee2mqtt.svg
+        - Node-RED:
+            href: https://red.${local_ingress_domain}
+            description: Automation flows
+            icon: node-red.svg
+        - Frigate:
+            href: https://frigate.${local_ingress_domain}
+            description: NVR
+            icon: frigate.svg
+
+    - Observability:
+        - Grafana:
+            href: https://grafana.${local_ingress_domain}
+            description: Dashboards
+            icon: grafana.svg
+        - Goldilocks:
+            href: https://goldilocks.${local_ingress_domain}
+            description: Resource recommendations
+            icon: kubernetes.svg
+
+    - Infrastructure:
+        - Longhorn:
+            href: https://longhorn.${local_ingress_domain}
+            description: Distributed storage
+            icon: longhorn.svg
+            widget:
+              type: longhorn
+              url: http://longhorn-frontend.longhorn-system.svc
+        - Keycloak:
+            href: https://sso.${local_ingress_domain}
+            description: Identity provider
+            icon: keycloak.svg
+        - MinIO:
+            href: https://minio.${local_ingress_domain}
+            description: Object storage
+            icon: minio.svg
+        - Homerun:
+            href: https://homerun.${local_ingress_domain}
+            description: Home dashboard
+            icon: home.svg
+
+  bookmarks.yaml: ""
+  docker.yaml: ""
+---
+apiVersion: v1
+kind: Service
 metadata:
   name: homepage
   namespace: homepage
 spec:
-  chart:
+  selector:
+    app: homepage
+  ports:
+    - port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  revisionHistoryLimit: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
     spec:
-      chart: homepage
-      version: "2.1.0"
-      sourceRef:
-        kind: HelmRepository
-        name: jameswynn
-        namespace: flux-system
-  interval: 15m
-  releaseName: homepage
-  targetNamespace: homepage
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-            patch: |-
-              - op: add
-                path: /spec/revisionHistoryLimit
-                value: 1
-  values:
-    ingress:
-      main:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/auth-signin: "${oauth_signin_url}"
-          nginx.ingress.kubernetes.io/auth-url: "${oauth_url}"
-        hosts:
-          - host: status.${local_ingress_domain}
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - status.${local_ingress_domain}
-
-    env:
-      - name: HOMEPAGE_ALLOWED_HOSTS
-        value: "status.${local_ingress_domain}"
-
-    config:
-      settings:
-        title: Rackman
-        layout:
-          Home Automation:
-            style: row
-            columns: 4
-          Observability:
-            style: row
-            columns: 4
-          Infrastructure:
-            style: row
-            columns: 4
-
-      widgets:
-        - kubernetes:
-            cluster:
-              show: true
-              cpu: true
-              memory: true
-              showLabel: true
-              label: rackman
-            nodes:
-              show: true
-              cpu: true
-              memory: true
-              showLabel: true
-
-      services:
-        - Home Automation:
-            - Home Assistant:
-                href: https://home.${local_ingress_domain}
-                description: Home automation hub
-                icon: home-assistant.svg
-            - Zigbee2MQTT:
-                href: https://hub.${local_ingress_domain}
-                description: Zigbee coordinator
-                icon: zigbee2mqtt.svg
-            - Node-RED:
-                href: https://red.${local_ingress_domain}
-                description: Automation flows
-                icon: node-red.svg
-            - Frigate:
-                href: https://frigate.${local_ingress_domain}
-                description: NVR
-                icon: frigate.svg
-
-        - Observability:
-            - Grafana:
-                href: https://grafana.${local_ingress_domain}
-                description: Dashboards
-                icon: grafana.svg
-            - Goldilocks:
-                href: https://goldilocks.${local_ingress_domain}
-                description: Resource recommendations
-                icon: kubernetes.svg
-
-        - Infrastructure:
-            - Longhorn:
-                href: https://longhorn.${local_ingress_domain}
-                description: Distributed storage
-                icon: longhorn.svg
-                widget:
-                  type: longhorn
-                  url: http://longhorn-frontend.longhorn-system.svc
-            - Keycloak:
-                href: https://sso.${local_ingress_domain}
-                description: Identity provider
-                icon: keycloak.svg
-            - MinIO:
-                href: https://minio.${local_ingress_domain}
-                description: Object storage
-                icon: minio.svg
-            - Homerun:
-                href: https://homerun.${local_ingress_domain}
-                description: Home dashboard
-                icon: home.svg
-
-    kubernetes:
-      mode: cluster
+      serviceAccountName: homepage
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v1.13.2
+          ports:
+            - containerPort: 3000
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "status.${local_ingress_domain}"
+          resources:
+            requests:
+              cpu: 20m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: config
+          configMap:
+            name: homepage-config
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage
+  namespace: homepage
+  annotations:
+    nginx.ingress.kubernetes.io/auth-signin: "${oauth_signin_url}"
+    nginx.ingress.kubernetes.io/auth-url: "${oauth_url}"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - status.${local_ingress_domain}
+  rules:
+    - host: status.${local_ingress_domain}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
