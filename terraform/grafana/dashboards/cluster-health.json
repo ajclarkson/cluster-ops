@@ -17,7 +17,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_memory_working_set_bytes{job=\"integrations/kubernetes/resources\"} / on(node) kube_node_status_capacity{resource=\"memory\"} * 100",
+          "expr": "node_memory_working_set_bytes{job=\"integrations/kubernetes/resources\"} / on(node) max by (node) (kube_node_status_capacity{resource=\"memory\"}) * 100",
           "legendFormat": "{{ node }}"
         }
       ],
@@ -55,7 +55,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(node_cpu_usage_seconds_total{job=\"integrations/kubernetes/resources\"}[5m]) / on(node) kube_node_status_capacity{resource=\"cpu\"} * 100",
+          "expr": "rate(node_cpu_usage_seconds_total{job=\"integrations/kubernetes/resources\"}[5m]) / on(node) max by (node) (kube_node_status_capacity{resource=\"cpu\"}) * 100",
           "legendFormat": "{{ node }}"
         }
       ],
@@ -312,7 +312,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "topk(10, container_memory_working_set_bytes{container!=\"\", container!=\"POD\"} / on(namespace, pod, container) kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"} * 100)",
+          "expr": "topk(10, container_memory_working_set_bytes{container!=\"\", container!=\"POD\"} / on(namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"}) * 100)",
           "instant": true,
           "format": "table",
           "legendFormat": ""
@@ -377,7 +377,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "(\n  container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"k8s-monitoring|loki|longhorn-system\", container=~\"alloy|loki|longhorn-manager\"}\n  / on(namespace, pod, container)\n  kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"}\n) * 100",
+          "expr": "(\n  container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"k8s-monitoring|loki|longhorn-system\", container=~\"alloy|loki|longhorn-manager\"}\n  / on(namespace, pod, container)\n  max by (namespace, pod, container) (kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", container!=\"POD\"})\n) * 100",
           "legendFormat": "{{ namespace }}/{{ container }} ({{ pod }})"
         }
       ],
