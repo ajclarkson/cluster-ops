@@ -829,7 +829,7 @@
     {
       "id": 13,
       "title": "Loaded automations",
-      "type": "stat",
+      "type": "timeseries",
       "gridPos": {
         "h": 6,
         "w": 24,
@@ -837,33 +837,41 @@
         "y": 26
       },
       "datasource": {
-        "type": "loki",
-        "uid": "loki"
+        "type": "prometheus",
+        "uid": "cf6z4wiex30u8e"
       },
       "targets": [
         {
           "refId": "A",
-          "expr": "last_over_time({namespace=\"homerun-system-bridge\"} |= `rescan_complete` | json | unwrap automation_count [1h])",
-          "queryType": "instant"
+          "expr": "homerun_automations_loaded",
+          "legendFormat": "automations loaded",
+          "instant": false,
+          "queryType": "range"
         }
       ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "background",
-        "graphMode": "none",
-        "orientation": "horizontal"
-      },
       "fieldConfig": {
         "defaults": {
           "unit": "short",
           "decimals": 0,
-          "noValue": "0",
+          "min": 0,
           "color": {
             "mode": "fixed",
             "fixedColor": "blue"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "line",
+            "spanNulls": false
           }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single"
+        },
+        "legend": {
+          "displayMode": "hidden"
         }
       }
     },
