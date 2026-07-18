@@ -81,6 +81,7 @@ spec:
               prefix: loki_index_
               period: 24h
       limits_config:
+        max_query_parallelism: 4
         retention_period: 336h #14 days
         retention_stream:
           - selector: '{namespace="home-assistant"}'
