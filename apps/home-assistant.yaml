@@ -160,6 +160,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: git-config
+              mountPath: /git-config
+              readOnly: true
             - name: ha-secrets
               mountPath: /config/secrets.yaml
               subPath: secrets.yaml
