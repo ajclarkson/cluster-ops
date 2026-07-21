@@ -124,6 +124,26 @@ spec:
                     values:
                       - observability
 
+      initContainers:
+        - name: git-sync-init
+          image: "registry.k8s.io/git-sync/git-sync:v4.4.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --repo=https://github.com/ajclarkson/homeassistant-config
+            - --branch=main
+            - --root=/git-config
+            - --link=current
+            - --depth=0
+            - --one-time
+          volumeMounts:
+            - name: git-config
+              mountPath: /git-config
+          resources:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+
       containers:
         - name: home-assistant
           image: "ghcr.io/home-assistant/home-assistant:2026.7.2"
