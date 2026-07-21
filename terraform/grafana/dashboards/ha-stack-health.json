@@ -1,7 +1,7 @@
 {
   "title": "Home Automation Stack Health",
   "uid": "rackman-ha-stack-health",
-  "description": "Service health for home-assistant, zigbee2mqtt, node-red and mosquitto",
+  "description": "Service health for home-assistant, zigbee2mqtt, homerun and mosquitto",
   "timezone": "browser",
   "schemaVersion": 38,
   "refresh": "1m",
@@ -79,45 +79,10 @@
       }
     },
     {
-      "id": 3,
-      "title": "Node-RED — restarts (24h)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"node-red\", container=\"node-red\"}[24h]))",
-          "instant": true
-        }
-      ],
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "colorMode": "background",
-        "graphMode": "none",
-        "orientation": "horizontal"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
-            ]
-          }
-        }
-      }
-    },
-    {
       "id": 4,
       "title": "Mosquitto — restarts (24h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -192,7 +157,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (namespace, container) (container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|node-red|mqtt|homerun\", container=~\"home-assistant|zigbee2mqtt|node-red|mosquitto|homerun\"})",
+          "expr": "sum by (namespace, container) (container_memory_working_set_bytes{namespace=~\"home-assistant|zigbee2mqtt|mqtt|homerun\", container=~\"home-assistant|zigbee2mqtt|mosquitto|homerun\"})",
           "legendFormat": "{{ namespace }}"
         }
       ],
@@ -231,12 +196,6 @@
         },
         {
           "refId": "C",
-          "expr": "sum(count_over_time({namespace=\"node-red\"} |= \"level=error\" [5m]))",
-          "legendFormat": "node-red",
-          "queryType": "range"
-        },
-        {
-          "refId": "D",
           "expr": "sum(count_over_time({namespace=\"homerun\"} |= \"ERROR\" [5m]))",
           "legendFormat": "homerun",
           "queryType": "range"
@@ -277,11 +236,6 @@
         },
         {
           "refId": "C",
-          "expr": "{namespace=\"node-red\"} |= \"level=error\" | line_format \"[node-red] {{__line__}}\"",
-          "queryType": "range"
-        },
-        {
-          "refId": "D",
           "expr": "{namespace=\"homerun\"} |= \"ERROR\" | line_format \"[homerun] {{__line__}}\"",
           "queryType": "range"
         }

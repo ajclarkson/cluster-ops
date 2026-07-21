@@ -186,7 +186,6 @@ spec:
           prometheus.scrape "blackbox_302" {
             targets = [
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://hub.local.clarksons.me/", __param_module = "http_302", instance = "zigbee2mqtt"},
-              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://red.local.clarksons.me/", __param_module = "http_302", instance = "node-red"},
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://frigate.local.clarksons.me/", __param_module = "http_302", instance = "frigate"},
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://grafana.local.clarksons.me/", __param_module = "http_302", instance = "grafana"},
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://goldilocks.local.clarksons.me/", __param_module = "http_302", instance = "goldilocks"},

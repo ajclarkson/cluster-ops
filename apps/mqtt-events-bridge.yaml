@@ -32,7 +32,6 @@ spec:
                 mosquitto_sub \
                   -h mqtt-mosquitto.mqtt \
                   -p 1883 \
-                  -t 'home/events' \
                   -t 'homerun/events' \
                   -q 0 \
                   -R \
@@ -41,7 +40,6 @@ spec:
                     topic="$${line%% *}"
                     payload="$${line#* }"
                     case "$$topic" in
-                      home/events)    src="node-red" ;;
                       homerun/events) src="homerun" ;;
                       *)              src="unknown" ;;
                     esac

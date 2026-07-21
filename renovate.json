@@ -29,8 +29,7 @@
       "matchPackageNames": [
         "ghcr.io/home-assistant/home-assistant",
         "eclipse-mosquitto",
-        "koenkk/zigbee2mqtt",
-        "nodered/node-red"
+        "koenkk/zigbee2mqtt"
       ],
       "matchUpdateTypes": ["patch", "minor"],
       "groupName": "home automation",
@@ -62,8 +61,7 @@
       "matchPackageNames": [
         "!ghcr.io/home-assistant/home-assistant",
         "!eclipse-mosquitto",
-        "!koenkk/zigbee2mqtt",
-        "!nodered/node-red"
+        "!koenkk/zigbee2mqtt"
       ]
     }
   ],
