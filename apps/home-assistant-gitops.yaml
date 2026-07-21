@@ -43,7 +43,7 @@ data:
 
     ha_reload() {
       local domain="$1" service="$2"
-      echo "[reload] Calling ${domain}.${service}"
+      echo "[reload] Calling $domain.$service"
       curl -s -o /dev/null \
         -X POST \
         -H "Authorization: Bearer $TOKEN" \
