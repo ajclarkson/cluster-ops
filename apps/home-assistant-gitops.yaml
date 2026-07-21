@@ -83,7 +83,7 @@ data:
 # Long-lived HA token used by the reload hook to call the HA API.
 # Create a long-lived token in HA (Profile → Security → Long-lived access tokens)
 # and store it in 1Password as item "ha-reload-token", field "token".
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: ha-reload-token
@@ -103,7 +103,7 @@ spec:
 # HA secrets.yaml — API keys, passwords referenced via !secret in HA config.
 # Store the full secrets.yaml content in 1Password as item "ha-secrets",
 # field "secrets.yaml" (use a multi-line text/password field).
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: ha-secrets
