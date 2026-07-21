@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - mqtt.yaml
 - home-assistant.yaml
+- home-assistant-gitops.yaml
 - zigbee2mqtt.yaml
 - zigbee2mqtt-exporter.yaml
 - flux-kube-state-metrics.yaml
