@@ -95,10 +95,6 @@ data:
             href: https://hub.${local_ingress_domain}
             description: Zigbee coordinator
             icon: zigbee2mqtt.svg
-        - Node-RED:
-            href: https://red.${local_ingress_domain}
-            description: Automation flows
-            icon: node-red.svg
         - Frigate:
             href: https://frigate.${local_ingress_domain}
             description: NVR

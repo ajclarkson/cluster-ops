@@ -8,7 +8,6 @@ resources:
 - zigbee2mqtt-exporter.yaml
 - flux-kube-state-metrics.yaml
 - grafana.yaml
-- node-red.yaml
 - influxdb.yaml
 - minio.yaml
 - loki.yaml
