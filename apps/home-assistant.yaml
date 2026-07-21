@@ -140,6 +140,10 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: ha-secrets
+              mountPath: /config/secrets.yaml
+              subPath: secrets.yaml
+              readOnly: true
           livenessProbe:
             tcpSocket:
               port: 8123
@@ -166,8 +170,46 @@ spec:
               memory: "2Gi"
             limits:
               memory: "2Gi"
+        - name: git-sync
+          image: "registry.k8s.io/git-sync/git-sync:v4.4.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --repo=https://github.com/ajclarkson/homeassistant-config
+            - --branch=main
+            - --root=/git-config
+            - --link=current
+            - --depth=0
+            - --period=60s
+            - --exechook-command=/hooks/reload.sh
+            - --exechook-timeout=30s
+          volumeMounts:
+            - name: git-config
+              mountPath: /git-config
+            - name: ha-reload-hook
+              mountPath: /hooks
+              readOnly: true
+            - name: ha-reload-token
+              mountPath: /secrets/ha-token
+              readOnly: true
+          resources:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 128Mi
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: home-assistant-config
+        - name: git-config
+          emptyDir: {}
+        - name: ha-reload-hook
+          configMap:
+            name: ha-reload-hook
+            defaultMode: 0755
+        - name: ha-reload-token
+          secret:
+            secretName: ha-reload-token
+        - name: ha-secrets
+          secret:
+            secretName: ha-secrets
 

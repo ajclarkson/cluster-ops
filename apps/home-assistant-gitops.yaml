@@ -1,0 +1,121 @@
+---
+# Reload hook executed by git-sync after every successful sync that produces changes.
+# Diffs changed files against the previous sync hash and calls only the affected
+# HA reload services, avoiding unnecessary full restarts.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ha-reload-hook
+  namespace: home-assistant
+data:
+  reload.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    HASH_FILE="/git-config/.last-sync-hash"
+    REPO="/git-config/current"
+    HA_URL="http://127.0.0.1:8123"
+    TOKEN=$(cat /secrets/ha-token/token)
+
+    NEW_HASH=$(git -C "$REPO" rev-parse HEAD)
+
+    if [ ! -f "$HASH_FILE" ]; then
+      echo "[reload] First sync ($NEW_HASH), skipping reload"
+      echo "$NEW_HASH" > "$HASH_FILE"
+      exit 0
+    fi
+
+    OLD_HASH=$(cat "$HASH_FILE")
+
+    if [ "$NEW_HASH" = "$OLD_HASH" ]; then
+      exit 0
+    fi
+
+    CHANGED=$(git -C "$REPO" diff --name-only "$OLD_HASH" "$NEW_HASH" 2>/dev/null || true)
+
+    if [ -z "$CHANGED" ]; then
+      echo "[reload] No file changes between $OLD_HASH..$NEW_HASH"
+      echo "$NEW_HASH" > "$HASH_FILE"
+      exit 0
+    fi
+
+    echo "[reload] $OLD_HASH..$NEW_HASH — changed: $(echo "$CHANGED" | tr '\n' ' ')"
+
+    ha_reload() {
+      local domain="$1" service="$2"
+      echo "[reload] Calling ${domain}.${service}"
+      curl -s -o /dev/null \
+        -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/json" \
+        "$HA_URL/api/services/$domain/$service"
+    }
+
+    SCENE_DONE=0
+    SCRIPT_DONE=0
+    TEMPLATE_DONE=0
+    LOVELACE_DONE=0
+    CORE_DONE=0
+    WARN_CONFIG=0
+
+    while IFS= read -r file; do
+      case "$file" in
+        scenes.yaml)
+          [ $SCENE_DONE -eq 0 ] && ha_reload scene reload && SCENE_DONE=1 ;;
+        scripts.yaml)
+          [ $SCRIPT_DONE -eq 0 ] && ha_reload script reload && SCRIPT_DONE=1 ;;
+        templates/*)
+          [ $TEMPLATE_DONE -eq 0 ] && ha_reload template reload && TEMPLATE_DONE=1 ;;
+        dashboard.yaml|views/*|www/*)
+          [ $LOVELACE_DONE -eq 0 ] && echo "[reload] Dashboard/www changed — browser hard-refresh required" && LOVELACE_DONE=1 ;;
+        packages/*)
+          [ $CORE_DONE -eq 0 ] && ha_reload homeassistant reload_core_config && CORE_DONE=1 ;;
+        configuration.yaml)
+          [ $CORE_DONE -eq 0 ] && ha_reload homeassistant reload_core_config && CORE_DONE=1
+          WARN_CONFIG=1 ;;
+      esac
+    done <<< "$CHANGED"
+
+    [ $WARN_CONFIG -eq 1 ] && echo "[reload] WARNING: configuration.yaml changed — some changes require a pod restart"
+
+    echo "$NEW_HASH" > "$HASH_FILE"
+---
+# Long-lived HA token used by the reload hook to call the HA API.
+# Create a long-lived token in HA (Profile → Security → Long-lived access tokens)
+# and store it in 1Password as item "ha-reload-token", field "token".
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: ha-reload-token
+  namespace: home-assistant
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: token
+      remoteRef:
+        key: ha-reload-token
+        property: token
+---
+# HA secrets.yaml — API keys, passwords referenced via !secret in HA config.
+# Store the full secrets.yaml content in 1Password as item "ha-secrets",
+# field "secrets.yaml" (use a multi-line text/password field).
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: ha-secrets
+  namespace: home-assistant
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "${onepassword_vault_name}"
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: secrets.yaml
+      remoteRef:
+        key: ha-secrets
+        property: secrets.yaml
