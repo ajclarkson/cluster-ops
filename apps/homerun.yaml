@@ -82,6 +82,8 @@ spec:
           env:
             - name: HOMERUN_CONFIG
               value: /config/configuration.yaml
+            - name: TZ
+              value: Europe/London
           livenessProbe:
             httpGet:
               path: /health/live
