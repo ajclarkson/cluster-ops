@@ -59,7 +59,7 @@
       {
         "name": "decision_filter",
         "type": "custom",
-        "label": "Show",
+        "label": "Log filter",
         "query": "Changes only : no_change,All : __none__",
         "options": [
           { "selected": true,  "text": "Changes only", "value": "no_change" },
@@ -76,7 +76,7 @@
       "id": 1,
       "title": "Decisions today",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -99,10 +99,45 @@
       }
     },
     {
+      "id": 26,
+      "title": "Aborts today",
+      "description": "Pipeline runs that aborted before reaching a decision — disabled automations, guard condition errors, or explicit abort() calls.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"abort\", location=~\"$location\", subsystem=~\"$subsystem\"} [24h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red",    "value": 10 }
+            ]
+          }
+        }
+      }
+    },
+    {
       "id": 2,
       "title": "Errors today",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 5, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -135,7 +170,7 @@
       "id": 15,
       "title": "Action success rate (1h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 9, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -170,7 +205,7 @@
       "id": 20,
       "title": "Pipeline runs today",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 13, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -197,7 +232,7 @@
       "id": 21,
       "title": "Automations loaded",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -603,11 +638,33 @@
       }
     },
     {
+      "id": 27,
+      "title": "Recent aborts",
+      "description": "Pipelines that aborted before making a decision. Reasons: disabled (automation turned off), unhandled_error (exception during condition evaluation), or an explicit abort() call from the automation logic.",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"abort\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} — {{.reason}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    },
+    {
       "id": 8,
       "title": "Automation errors",
       "description": "Action results where outputs.result = error. Should be empty in normal operation.",
       "type": "logs",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 43 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
