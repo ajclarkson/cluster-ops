@@ -1,7 +1,7 @@
 {
   "title": "Home Automation Stack Health",
   "uid": "rackman-ha-stack-health",
-  "description": "Service health for home-assistant, zigbee2mqtt, homerun and mosquitto",
+  "description": "Service health and platform metrics for homerun, home-assistant, zigbee2mqtt and mosquitto",
   "timezone": "browser",
   "schemaVersion": 38,
   "refresh": "1m",
@@ -12,7 +12,7 @@
       "id": 1,
       "title": "Home Assistant — restarts (24h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -35,9 +35,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
+              { "color": "green",  "value": null },
               { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
+              { "color": "red",    "value": 3 }
             ]
           }
         }
@@ -47,7 +47,7 @@
       "id": 2,
       "title": "Zigbee2MQTT — restarts (24h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -70,9 +70,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
+              { "color": "green",  "value": null },
               { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
+              { "color": "red",    "value": 3 }
             ]
           }
         }
@@ -82,7 +82,7 @@
       "id": 4,
       "title": "Mosquitto — restarts (24h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -105,9 +105,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
+              { "color": "green",  "value": null },
               { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
+              { "color": "red",    "value": 3 }
             ]
           }
         }
@@ -117,7 +117,7 @@
       "id": 8,
       "title": "homerun — restarts (24h)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "gridPos": { "h": 4, "w": 5, "x": 15, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -140,19 +140,216 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
+              { "color": "green",  "value": null },
               { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
+              { "color": "red",    "value": 3 }
             ]
           }
         }
       }
     },
     {
-      "id": 5,
-      "title": "Container Memory",
+      "id": 9,
+      "title": "Automations loaded",
+      "description": "Number of automations currently loaded by homerun. A sudden drop indicates a reload failure.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "homerun_automations_loaded",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red",    "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "green",  "value": 40 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "HA event ingestion rate",
+      "description": "Rate of events received from Home Assistant by event type.",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(homerun_ha_events_received_total[5m])",
+          "legendFormat": "{{ event_type }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Pipeline runs by trigger type",
+      "description": "What is driving automation runs — sensor events, schedules, button presses or startup.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (trigger_type) (rate(homerun_pipeline_runs_total[5m]))",
+          "legendFormat": "{{ trigger_type }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "stacking": { "mode": "normal", "group": "A" }
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Action outcomes",
+      "description": "Dispatched, succeeded and failed actions over time. Succeeded and dispatched should track closely.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(homerun_actions_dispatched_total[5m]))",
+          "legendFormat": "dispatched",
+          "instant": false,
+          "queryType": "range"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(homerun_actions_succeeded_total[5m]))",
+          "legendFormat": "succeeded",
+          "instant": false,
+          "queryType": "range"
+        },
+        {
+          "refId": "C",
+          "expr": "sum(rate(homerun_actions_failed_total[5m]))",
+          "legendFormat": "failed",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "failed" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "succeeded" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Action duration — p50 / p95",
+      "description": "Execution latency by action type. p95 spikes may indicate HA or MQTT slowness.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum by (action_type, le) (rate(homerun_action_duration_seconds_bucket[5m])))",
+          "legendFormat": "p50 {{ action_type }}",
+          "instant": false,
+          "queryType": "range"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (action_type, le) (rate(homerun_action_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{ action_type }}",
+          "instant": false,
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Container memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
@@ -177,9 +374,9 @@
     },
     {
       "id": 6,
-      "title": "Error Rate",
+      "title": "Error rate by service",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
@@ -204,12 +401,12 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "min": 0,
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 10,
             "drawStyle": "bars"
-          },
-          "min": 0
+          }
         }
       },
       "options": {
@@ -219,9 +416,9 @@
     },
     {
       "id": 7,
-      "title": "Recent Errors",
+      "title": "Recent errors",
       "type": "logs",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 36 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
