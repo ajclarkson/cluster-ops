@@ -1,0 +1,17 @@
+name: cluster-ops
+root: ~/workspace/cluster-ops
+
+windows:
+  - editor:
+      layout: even-horizontal
+      panes:
+        - nvim .
+        - claude
+
+  - terminal:
+      panes:
+        - fish
+
+  - k9s:
+      panes:
+        - k9s
