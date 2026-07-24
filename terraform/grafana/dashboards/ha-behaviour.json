@@ -680,6 +680,63 @@
         "sortOrder": "Descending",
         "wrapLogMessage": true
       }
+    },
+    {
+      "id": 29,
+      "title": "Ack timeouts today",
+      "description": "Dispatched ha.call_service actions whose target entity never reached the expected state within homerun's commandAck timeout — device unreachable, Zigbee mesh failure, or HA accepting the call but nothing responding.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 51 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"action_ack_timeout\", location=~\"$location\", subsystem=~\"$subsystem\"} [24h]))",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red",    "value": 10 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 30,
+      "title": "Recent ack timeouts",
+      "description": "Individual action_ack_timeout events — the entity and state that was expected but never observed.",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 55 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"action_ack_timeout\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} — {{.entity}} expected {{.expected}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
     }
   ]
 }

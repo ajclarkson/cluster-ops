@@ -45,6 +45,10 @@ data:
     metrics:
       enabled: true
 
+    commandAck:
+      enabled: true
+      timeoutMs: 8000
+
     options:
       dry_run: false
 ---
