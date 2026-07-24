@@ -57,16 +57,26 @@
         "hide": 0
       },
       {
-        "name": "decision_filter",
+        "name": "activity_filter",
         "type": "custom",
         "label": "Log filter",
-        "query": "Changes only : no_change,All : __none__",
+        "description": "Filters on the framework-computed hasAction field (actions.length > 0), not on matching decision/reason strings — robust across every automation's own no-op vocabulary (no_change, no_action, already_on, ...).",
+        "query": "Actions only : true,All : .*",
         "options": [
-          { "selected": true,  "text": "Changes only", "value": "no_change" },
-          { "selected": false, "text": "All",          "value": "__none__" }
+          { "selected": true,  "text": "Actions only", "value": "true" },
+          { "selected": false, "text": "All",          "value": ".*" }
         ],
-        "current": { "selected": true, "text": "Changes only", "value": "no_change" },
+        "current": { "selected": true, "text": "Actions only", "value": "true" },
         "includeAll": false,
+        "hide": 0
+      },
+      {
+        "name": "correlation_id",
+        "type": "textbox",
+        "label": "Correlation ID",
+        "description": "Paste a correlation_id, root_correlation_id, or parent_correlation_id to trace a full causal chain in the \"Correlation trace\" panel below.",
+        "query": "",
+        "current": { "value": "", "text": "" },
         "hide": 0
       }
     ]
@@ -81,7 +91,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | hasAction=~\"$activity_filter\" [24h]))",
           "queryType": "range"
         }
       ],
@@ -136,14 +146,15 @@
     {
       "id": 2,
       "title": "Errors today",
+      "description": "Failed action executions (homerun_actions_failed_total), filtered by location only — this metric has no subsystem label. See the \"Automation errors\" log panel below for subsystem-scoped detail on individual failures.",
       "type": "stat",
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} [24h]))",
-          "queryType": "range"
+          "expr": "sum(increase(homerun_actions_failed_total{location=~\"$location\"}[24h]))",
+          "instant": true
         }
       ],
       "options": {
@@ -271,7 +282,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [10m]))",
+          "expr": "sum by (subsystem) (count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | hasAction=~\"$activity_filter\" [10m]))",
           "legendFormat": "{{ subsystem }}",
           "queryType": "range"
         }
@@ -432,7 +443,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"lighting\", location=~\"$location\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"lighting\", location=~\"$location\"} | json | hasAction=~\"$activity_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -465,7 +476,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"occupied\", location=~\"$location\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"occupied\", location=~\"$location\"} | json | hasAction=~\"$activity_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -498,7 +509,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"heating\", location=~\"$location\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"heating\", location=~\"$location\"} | json | hasAction=~\"$activity_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -531,7 +542,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"sonos\", location=~\"$location\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"sonos\", location=~\"$location\"} | json | hasAction=~\"$activity_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -564,7 +575,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"cameras\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" [2h]))",
+          "expr": "sum(count_over_time({service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", subsystem=\"cameras\"} | json | hasAction=~\"$activity_filter\" [2h]))",
           "queryType": "range"
         }
       ],
@@ -618,14 +629,14 @@
     {
       "id": 7,
       "title": "Recent decisions",
-      "description": "What the house decided to do and why. Expand any row for full input context.",
+      "description": "What the house decided to do and why. Expand any row for full conditions context.",
       "type": "logs",
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 23 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | decision !~ \"$decision_filter\" | reason !~ \"$decision_filter\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"decision\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | hasAction=~\"$activity_filter\" | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} · {{.reason}} (via {{.trigger_type}}{{if .trigger_entity_id}}: {{.trigger_entity_id}}{{end}})\"",
           "queryType": "range"
         }
       ],
@@ -640,14 +651,14 @@
     {
       "id": 27,
       "title": "Recent aborts",
-      "description": "Pipelines that aborted before making a decision. Reasons: disabled (automation turned off), unhandled_error (exception during condition evaluation), or an explicit abort() call from the automation logic.",
+      "description": "Pipelines that aborted before making a decision, classified by abort_kind: disabled (automation turned off), unhandled_error (exception during context/reduce), or guard (an explicit abort() call from the automation logic — reason is only populated for this kind).",
       "type": "logs",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"abort\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} — {{.reason}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"abort\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} — {{.abort_kind}}{{if .reason}}: {{.reason}}{{end}}\"",
           "queryType": "range"
         }
       ],
@@ -662,14 +673,14 @@
     {
       "id": 8,
       "title": "Automation errors",
-      "description": "Action results where outputs.result = error. Should be empty in normal operation.",
+      "description": "action_result events where status = error. Should be empty in normal operation.",
       "type": "logs",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 43 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"loki.source.kubernetes.home_events\", outputs_result=\"error\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | line_format \"[{{.location}}] {{.subsystem}} → {{.decision}} ({{.reason}}) — {{.outputs_action}}\"",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\", event_type=\"action_result\", location=~\"$location\", subsystem=~\"$subsystem\"} | json | status=\"error\" | line_format \"[{{.location}}] {{.subsystem}} · {{.automation_id}} → {{.action_type}} failed: {{.error}}\"",
           "queryType": "range"
         }
       ],
@@ -736,6 +747,28 @@
         "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": false
+      }
+    },
+    {
+      "id": 28,
+      "title": "Correlation trace",
+      "description": "Paste a correlation_id, root_correlation_id, or parent_correlation_id into the variable above to see every event in that causal chain, in order — e.g. a decision, the mqtt.publish action it dispatched, the state_changed that action implied, and whatever automation that state_changed triggered next. Ignores the location/subsystem/activity filters deliberately, since a chain can cross both.",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 63 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"loki.source.kubernetes.home_events\"} |~ \"$correlation_id\" | json | line_format \"[{{.location}}] {{.subsystem}} · {{.automation_id}} → {{.event_type}}{{if .decision}} {{.decision}} ({{.reason}}){{end}}{{if .abort_kind}} {{.abort_kind}}{{end}}{{if .action_type}} {{.action_type}} [{{.status}}]{{end}}\"",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": true
       }
     }
   ]
