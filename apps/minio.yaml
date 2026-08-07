@@ -126,6 +126,12 @@ spec:
     ## Port number for MinIO Browser Console Access
     minioConsolePort: "9001"
 
+    environment:
+      # Go GC isn't cgroup-aware without this; RSS was creeping toward the
+      # 3Gi limit (~2.8Gi used for ~5GB of actual data) and contributing to
+      # node memory pressure on blinky (RPi, 8GB total).
+      GOMEMLIMIT: "2560MiB"
+
     persistence:
       enabled: true
       annotations: {}
