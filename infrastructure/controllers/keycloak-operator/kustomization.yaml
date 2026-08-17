@@ -4,11 +4,12 @@ kind: Kustomization
 namespace: keycloak
 resources:
   - namespace.yaml
-  # CRDs vendored locally (pinned to keycloak-k8s-resources v26.4.0) instead of
-  # referenced via raw.githubusercontent.com URL — kustomize fetches remote URL
-  # resources on every reconcile, which got rate-limited (429) by GitHub.
-  # To bump: re-download the three files below from
-  # https://github.com/keycloak/keycloak-k8s-resources/tree/<new-tag>/kubernetes
+  # CRDs vendored locally instead of referenced via raw.githubusercontent.com
+  # URL — kustomize fetches remote URL resources on every reconcile, which got
+  # rate-limited (429) by GitHub. To bump: run
+  # scripts/update-keycloak-crds.sh <new-version> and commit the result.
+  # Version tracked below by a custom Renovate manager, see renovate.json.
+  # CRD_VERSION: 26.4.0
   - crds/keycloaks.k8s.keycloak.org-v1.yml
   - crds/keycloakrealmimports.k8s.keycloak.org-v1.yml
   - crds/kubernetes.yml
