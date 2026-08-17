@@ -88,18 +88,6 @@
       "depNameTemplate": "k3s",
       "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>\\+k3s)(?<build>\\d+)$",
       "datasourceTemplate": "custom.k3s"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/infrastructure/controllers/keycloak-operator/kustomization.yaml/"
-      ],
-      "matchStrings": [
-        "# CRD_VERSION: (?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"
-      ],
-      "depNameTemplate": "keycloak/keycloak-k8s-resources",
-      "datasourceTemplate": "github-tags",
-      "extractVersionTemplate": "^v?(?<version>.*)$"
     }
   ],
   "customDatasources": {
