@@ -1479,7 +1479,7 @@ resource "grafana_rule_group" "infra_5m" {
   }
 
   rule {
-    name      = "PhotoBackupStale"
+    name      = "BackupStale"
     condition = "C"
 
     data {
@@ -1490,7 +1490,7 @@ resource "grafana_rule_group" "infra_5m" {
       }
       datasource_uid = data.grafana_data_source.mimir.uid
       model = jsonencode({
-        expr          = "time() - photo_backup_last_success_timestamp_seconds"
+        expr          = "time() - backup_last_success_timestamp_seconds"
         intervalMs    = 1000
         maxDataPoints = 43200
         refId         = "A"
@@ -1541,8 +1541,8 @@ resource "grafana_rule_group" "infra_5m" {
     exec_err_state = "Error"
     for            = "5m"
     annotations = {
-      summary     = "Photo backup to B2 hasn't succeeded in over 36 hours"
-      description = "The daily photo-backup.timer on clyde runs at 03:00 — no successful run in >36h means either the job is failing or the machine's been down. Check `systemctl status photo-backup.service` and `journalctl -u photo-backup.service` on clyde."
+      summary     = "{{ $labels.job }} backup to B2 hasn't succeeded in over 36 hours"
+      description = "The daily {{ $labels.job }} backup timer on clyde (photo-backup.timer at 03:00, cold-backup.timer at 03:30) hasn't had a successful run in >36h — either the job is failing or the machine's been down. Check `systemctl status <job>-backup.service` and `journalctl -u <job>-backup.service` on clyde."
     }
     is_paused = false
 
