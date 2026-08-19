@@ -110,7 +110,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
-        { "refId": "A", "expr": "zfs_scrub_last_finish_timestamp_seconds{pool=\"tank\"}", "instant": true }
+        { "refId": "A", "expr": "zfs_scrub_last_finish_timestamp_seconds{pool=\"tank\"} * 1000", "instant": true }
       ],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
       "fieldConfig": {
@@ -124,7 +124,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
       "targets": [
-        { "refId": "A", "expr": "photo_backup_last_success_timestamp_seconds", "instant": true }
+        { "refId": "A", "expr": "photo_backup_last_success_timestamp_seconds * 1000", "instant": true }
       ],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
       "fieldConfig": {
