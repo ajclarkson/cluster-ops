@@ -1,0 +1,246 @@
+{
+  "title": "Storage & Photo Backup Health",
+  "uid": "rackman-storage-health",
+  "description": "ZFS pool health/capacity on clyde, SMART drive attributes, and photo-archive B2 backup status",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "5m",
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Pool Online",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "zfs_pool_state{pool=\"tank\",state=\"ONLINE\"}", "instant": true }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "NOT ONLINE", "color": "red", "index": 0 } } },
+            { "type": "value", "options": { "1": { "text": "ONLINE", "color": "green", "index": 1 } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Pool Capacity",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "zfs_pool_capacity_percent{pool=\"tank\"}", "instant": true }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "red", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Pool Free Space",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "zfs_pool_free_bytes{pool=\"tank\"}", "instant": true }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "decimals": 1,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Scrub Errors",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "zfs_scrub_errors{pool=\"tank\"}", "instant": true }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Last Scrub Finished",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "zfs_scrub_last_finish_timestamp_seconds{pool=\"tank\"}", "instant": true }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": { "unit": "dateTimeFromNow" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Photo Backup Last Success",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "photo_backup_last_success_timestamp_seconds", "instant": true }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "SMART Attributes",
+      "description": "Per-drive health, temperature, and sector counts. Reallocated/pending sectors are expected to occasionally be non-zero on older drives — watch the trend over time (panel below), not just the current value.",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "smart_health_passed", "instant": true, "format": "table" },
+        { "refId": "B", "expr": "smart_temperature_celsius", "instant": true, "format": "table" },
+        { "refId": "C", "expr": "smart_reallocated_sector_count", "instant": true, "format": "table" },
+        { "refId": "D", "expr": "smart_current_pending_sector", "instant": true, "format": "table" },
+        { "refId": "E", "expr": "smart_offline_uncorrectable", "instant": true, "format": "table" }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": { "byField": "drive", "mode": "outer" }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": ["drive", "Value #A", "Value #B", "Value #C", "Value #D", "Value #E"]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "Health Passed",
+              "Value #B": "Temp (C)",
+              "Value #C": "Reallocated",
+              "Value #D": "Pending",
+              "Value #E": "Offline Uncorrectable"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Health Passed" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "0": { "text": "FAILED", "color": "red" } } },
+                  { "type": "value", "options": { "1": { "text": "PASSED", "color": "green" } } }
+                ]
+              },
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Pending" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 1 },
+                    { "color": "red", "value": 200 }
+                  ]
+                }
+              },
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          }
+        ]
+      },
+      "options": { "footer": { "show": false } }
+    },
+    {
+      "id": 8,
+      "title": "SMART Pending/Reallocated Sector Trend",
+      "description": "The key thing to actually watch — a static count isn't alarming on its own, growth over time is.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "smart_current_pending_sector", "legendFormat": "{{drive}} pending" },
+        { "refId": "B", "expr": "smart_reallocated_sector_count", "legendFormat": "{{drive}} reallocated" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 9,
+      "title": "Drive Temperature",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "cf6z4wiex30u8e" },
+      "targets": [
+        { "refId": "A", "expr": "smart_temperature_celsius", "legendFormat": "{{drive}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "celsius" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
+    }
+  ]
+}

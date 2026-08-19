@@ -21,3 +21,7 @@ resource "grafana_dashboard" "flux_status" {
 resource "grafana_dashboard" "status_page" {
   config_json = file("${path.module}/dashboards/status-page.json")
 }
+
+resource "grafana_dashboard" "storage_health" {
+  config_json = file("${path.module}/dashboards/storage-health.json")
+}

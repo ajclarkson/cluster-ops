@@ -66,6 +66,17 @@ spec:
             forward_to      = [prometheus.remote_write.mimir.receiver]
           }
 
+          // ZFS pool / SMART / photo-backup metrics — standalone exporter running
+          // directly on clyde (host-level, not k8s), scraped by fixed address since
+          // it needs direct access to zpool/smartctl on the host.
+          prometheus.scrape "clyde_host_metrics" {
+            targets = [{__address__ = "10.0.0.54:9101", instance = "clyde"}]
+            metrics_path    = "/metrics"
+            scrape_interval = "60s"
+            job_name        = "clyde-host-metrics"
+            forward_to      = [prometheus.remote_write.mimir.receiver]
+          }
+
           discovery.kubernetes "flux_pods" {
             role = "pod"
             namespaces {
