@@ -150,7 +150,8 @@ spec:
             claimName: zigbee2mqtt-data
         - name: ttyacm
           hostPath:
-            path: /dev/ttyUSB0
+            path: /dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0
+            type: CharDevice
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
