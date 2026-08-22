@@ -59,6 +59,13 @@ spec:
     deploymentStrategy:
       type: Recreate
 
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 50m
+      limits:
+        memory: 400Mi
+
     persistence:
       enabled: true
       size: 5Gi

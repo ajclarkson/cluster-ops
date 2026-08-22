@@ -39,3 +39,9 @@ spec:
         default-ssl-certificate: "cert-manager/local.clarksons.me-tls"
       metrics:
         enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 225Mi
+        limits:
+          memory: 400Mi
