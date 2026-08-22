@@ -45,7 +45,6 @@ spec:
       svc_enable: "true"
       svc_election: "true"
       vip_leaderelection: "true"
-      vip_leaseduration: "5"
 
     serviceAccount:
       # Specifies whether a service account should be created
