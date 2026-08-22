@@ -190,9 +190,9 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              memory: "2Gi"
+              memory: "1.25Gi"
             limits:
-              memory: "2Gi"
+              memory: "1.75Gi"
         - name: git-sync
           image: "registry.k8s.io/git-sync/git-sync:v4.4.0"
           imagePullPolicy: IfNotPresent
