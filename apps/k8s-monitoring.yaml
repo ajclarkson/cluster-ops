@@ -49,10 +49,10 @@ spec:
         alloy:
           resources:
             requests:
-              memory: 256Mi
+              memory: 400Mi
               cpu: 100m
             limits:
-              memory: 500Mi
+              memory: 700Mi
               cpu: 250m
         controller:
           nodeSelector:
