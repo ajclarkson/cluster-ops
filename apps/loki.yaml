@@ -142,9 +142,9 @@ spec:
             name: minio-loki-credentials
       resources:
         requests:
-          memory: 256Mi
+          memory: 700Mi
         limits:
-          memory: 1Gi
+          memory: 2Gi
 
     gateway:
       enabled: true
