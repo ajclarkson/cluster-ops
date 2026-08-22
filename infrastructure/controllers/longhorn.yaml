@@ -77,17 +77,11 @@ spec:
         nginx.ingress.kubernetes.io/auth-signin: "${oauth_signin_url}"
         nginx.ingress.kubernetes.io/auth-url: "${oauth_url}"
 
-    # Limit manager / engine memory usage
-    manager:
-      resources:
-        requests:
-          memory: 256Mi
-          cpu: 100m
-        limits:
-          memory: 512Mi
-          cpu: 500m
-
-    engine:
+    # Limit Longhorn Manager memory usage
+    # Note: no equivalent key exists for engine/instance-manager pods —
+    # those are created dynamically by longhorn-manager itself, not via
+    # Helm templates, so their resources can't be set through values.
+    longhornManager:
       resources:
         requests:
           memory: 256Mi
