@@ -45,9 +45,6 @@ spec:
   timeout: 5m
   releaseName: mimir
   targetNamespace: mimir
-  upgrade:
-    remediation:
-      retries: 2
   postRenderers:
     - kustomize:
         patches:
@@ -57,6 +54,17 @@ spec:
               - op: add
                 path: /spec/revisionHistoryLimit
                 value: 1
+          - target:
+              kind: Deployment
+              name: mimir-rollout-operator
+            patch: |-
+              - op: replace
+                path: /spec/strategy
+                value:
+                  type: RollingUpdate
+                  rollingUpdate:
+                    maxSurge: 1
+                    maxUnavailable: 0
   values:
     global:
       extraEnvFrom:
