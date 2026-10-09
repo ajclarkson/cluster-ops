@@ -89,3 +89,15 @@ spec:
         limits:
           memory: 512Mi
           cpu: 500m
+
+    # New in 1.13.0: cluster-wide pod/PV controllers split out of the
+    # longhorn-manager DaemonSet into their own Deployment. Unbounded by
+    # default in the chart — cap it like longhornManager above.
+    longhornGlobalManager:
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 256Mi
+          cpu: 250m
