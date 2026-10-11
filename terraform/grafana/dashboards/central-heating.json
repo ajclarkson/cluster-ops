@@ -1,0 +1,341 @@
+{
+  "title": "Central Heating",
+  "uid": "rackman-central-heating",
+  "description": "Room temperatures vs setpoint, heat demand, and boiler firing — sourced from InfluxDB (Home Assistant default integration)",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "5m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Boiler duty cycle (24h)",
+      "description": "Percentage of the last 24h the boiler relay has been firing",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT mean(\"state\") * 100 FROM (SELECT last(\"value\") AS \"state\" FROM \"binary_sensor.house_heating_boiler_firing\" WHERE $timeFilter GROUP BY time(1m) fill(previous))",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Heating enabled",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"value\") FROM \"input_boolean.house_heating_enabled\" WHERE $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Off", "color": "red" },
+                "1": { "text": "On", "color": "green" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Boiler firing now",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"value\") FROM \"binary_sensor.house_heating_boiler_firing\" WHERE $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Idle", "color": "dark-grey" },
+                "1": { "text": "Firing", "color": "orange" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Boiler firing & room demand",
+      "description": "Which room(s) were calling for heat (TRV heat_required) alongside the boiler relay state — read top-to-bottom to see what caused each firing period. Foreign Office uses a plug heater, not a TRV, so it has no heat_required signal here.",
+      "type": "state-timeline",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Boiler\" FROM \"binary_sensor.house_heating_boiler_firing\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Parlour\" FROM \"binary_sensor.parlour_trv_heat_required\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Kitchen\" FROM \"binary_sensor.kitchen_trv_heat_required\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Hallway\" FROM \"binary_sensor.hallway_downstairs_trv_heat_required\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bedroom\" FROM \"binary_sensor.bedroom_trv_heat_required\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bathroom\" FROM \"binary_sensor.bathroom_trv_heat_required\" WHERE $timeFilter" },
+        { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Home Office\" FROM \"binary_sensor.home_office_trv_heat_required\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Idle", "color": "dark-grey" },
+                "1": { "text": "On", "color": "orange" }
+              }
+            }
+          ]
+        }
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "never",
+        "alignValue": "left",
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Parlour — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.parlour_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.parlour_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Kitchen — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.kitchen_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.kitchen_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Hallway Downstairs — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.hallway_downstairs_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.hallway_downstairs_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Bedroom — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.bedroom_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.bedroom_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Bathroom — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.bathroom_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.bathroom_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Home Office — temp vs setpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.home_office_trv\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.home_office_trv\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 16,
+      "title": "Foreign Office — temp vs setpoint",
+      "description": "Plug-heater generic_thermostat, not a TRV — no heat_required signal, so it's excluded from the demand timeline above.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"current_temperature\" AS \"Actual\" FROM \"climate.foreign_office\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"temperature\" AS \"Setpoint\" FROM \"climate.foreign_office\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 6], "fill": "dash" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 20,
+      "title": "Active heating mode by room",
+      "description": "Which temperature preset (comfort / baseline_day / baseline_night / minimum) or off each room's schedule selected over time",
+      "type": "state-timeline",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 44 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Parlour\" FROM \"sensor.parlour_active_heating\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Kitchen\" FROM \"sensor.kitchen_active_heating\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_active_heating\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bedroom\" FROM \"sensor.bedroom_active_heating\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bathroom\" FROM \"sensor.bathroom_active_heating\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Home Office\" FROM \"sensor.home_office_active_heating\" WHERE $timeFilter" },
+        { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Foreign Office\" FROM \"sensor.foreign_office_active_heating\" WHERE $timeFilter" }
+      ],
+      "options": {
+        "mergeValues": true,
+        "showValue": "never",
+        "alignValue": "left",
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    }
+  ]
+}
