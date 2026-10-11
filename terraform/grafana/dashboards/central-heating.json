@@ -317,18 +317,19 @@
     {
       "id": 20,
       "title": "Active heating mode by room",
-      "description": "Which temperature preset (comfort / baseline_day / baseline_night / minimum) or off each room's schedule selected over time",
+      "description": "House mode (away/sleep/vacation/normal) alongside each room's active heating preset (comfort / baseline_day / baseline_night / minimum / off) over time",
       "type": "state-timeline",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 44 },
       "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
       "targets": [
-        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Parlour\" FROM \"sensor.parlour_active_heating\" WHERE $timeFilter" },
-        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Kitchen\" FROM \"sensor.kitchen_active_heating\" WHERE $timeFilter" },
-        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_active_heating\" WHERE $timeFilter" },
-        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bedroom\" FROM \"sensor.bedroom_active_heating\" WHERE $timeFilter" },
-        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bathroom\" FROM \"sensor.bathroom_active_heating\" WHERE $timeFilter" },
-        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Home Office\" FROM \"sensor.home_office_active_heating\" WHERE $timeFilter" },
-        { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Foreign Office\" FROM \"sensor.foreign_office_active_heating\" WHERE $timeFilter" }
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"House Mode\" FROM \"sensor.house_active_mode\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Parlour\" FROM \"sensor.parlour_active_heating\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Kitchen\" FROM \"sensor.kitchen_active_heating\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_active_heating\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bedroom\" FROM \"sensor.bedroom_active_heating\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bathroom\" FROM \"sensor.bathroom_active_heating\" WHERE $timeFilter" },
+        { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Home Office\" FROM \"sensor.home_office_active_heating\" WHERE $timeFilter" },
+        { "refId": "H", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Foreign Office\" FROM \"sensor.foreign_office_active_heating\" WHERE $timeFilter" }
       ],
       "fieldConfig": {
         "defaults": {
@@ -341,7 +342,11 @@
                 "baseline_day":   { "text": "Baseline day",   "color": "light-blue" },
                 "baseline_night": { "text": "Baseline night", "color": "dark-blue" },
                 "minimum":        { "text": "Minimum",        "color": "purple" },
-                "off":            { "text": "Off",             "color": "dark-grey" }
+                "off":            { "text": "Off",             "color": "dark-grey" },
+                "normal":         { "text": "Normal",         "color": "green" },
+                "sleep":          { "text": "Sleep",          "color": "blue" },
+                "away":           { "text": "Away",           "color": "red" },
+                "vacation":       { "text": "Vacation",       "color": "dark-red" }
               }
             }
           ]
