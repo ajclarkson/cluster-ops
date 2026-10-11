@@ -330,6 +330,23 @@
         { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Home Office\" FROM \"sensor.home_office_active_heating\" WHERE $timeFilter" },
         { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Foreign Office\" FROM \"sensor.foreign_office_active_heating\" WHERE $timeFilter" }
       ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "comfort":        { "text": "Comfort",        "color": "orange" },
+                "baseline_day":   { "text": "Baseline day",   "color": "light-blue" },
+                "baseline_night": { "text": "Baseline night", "color": "dark-blue" },
+                "minimum":        { "text": "Minimum",        "color": "purple" },
+                "off":            { "text": "Off",             "color": "dark-grey" }
+              }
+            }
+          ]
+        }
+      },
       "options": {
         "mergeValues": true,
         "showValue": "never",
