@@ -16,7 +16,7 @@
       "title": "Boiler duty cycle (24h)",
       "description": "Percentage of the last 24h the boiler relay has been firing",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
       "targets": [
         {
@@ -43,7 +43,7 @@
       "id": 2,
       "title": "Heating enabled",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
       "targets": [
         {
@@ -78,7 +78,7 @@
       "id": 3,
       "title": "Boiler firing now",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
       "targets": [
         {
@@ -106,6 +106,35 @@
               }
             }
           ]
+        }
+      }
+    },
+    {
+      "id": 31,
+      "title": "Boiler cycles (24h)",
+      "description": "Number of times the boiler relay turned on in the last 24h. HA's InfluxDB integration only records a point on state change, so counting recorded \"on\" points directly counts firing cycles — no resampling needed. High count with low duty-cycle % indicates short-cycling (frequent brief firings) rather than a few steady burns, which wastes gas and wears the system.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"value\") FROM \"binary_sensor.house_heating_boiler_firing\" WHERE \"value\" = 1 AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "color": { "mode": "fixed", "fixedColor": "purple" }
         }
       }
     },
@@ -357,6 +386,124 @@
         "showValue": "never",
         "alignValue": "left",
         "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 40,
+      "title": "Heating source by room",
+      "description": "Why each room is at its current setpoint: schedule (normal timetable), manual (user override via the manual-mode helper), house_mode (sleep/away/vacation forcing), or safety (window open, or heating disabled). A room showing manual far more than schedule means its timetable doesn't match how you actually want it heated — tune the schedule, not the override.",
+      "type": "state-timeline",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 52 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Parlour\" FROM \"sensor.parlour_heating_source\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Kitchen\" FROM \"sensor.kitchen_heating_source\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_heating_source\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bedroom\" FROM \"sensor.bedroom_heating_source\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Bathroom\" FROM \"sensor.bathroom_heating_source\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Home Office\" FROM \"sensor.home_office_heating_source\" WHERE $timeFilter" },
+        { "refId": "G", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"state\" AS \"Foreign Office\" FROM \"sensor.foreign_office_heating_source\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "schedule":   { "text": "Schedule",   "color": "green" },
+                "manual":     { "text": "Manual",     "color": "orange" },
+                "house_mode": { "text": "House mode", "color": "blue" },
+                "safety":     { "text": "Safety",     "color": "red" },
+                "none":       { "text": "None",       "color": "dark-grey" }
+              }
+            }
+          ]
+        }
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "never",
+        "alignValue": "left",
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 41,
+      "title": "TRV load estimate by room",
+      "description": "Each TRV's own adaptive estimate of how much heat its radiator can deliver. A room whose estimate drifts down over weeks relative to the others points at a specific radiator problem (airlock, valve not opening fully, undersized for the room) rather than a scheduling issue.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 60 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Parlour\" FROM \"sensor.parlour_trv_load_estimate\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Kitchen\" FROM \"sensor.kitchen_trv_load_estimate\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_trv_load_estimate\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bedroom\" FROM \"sensor.bedroom_trv_load_estimate\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bathroom\" FROM \"sensor.bathroom_trv_load_estimate\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Home Office\" FROM \"sensor.home_office_trv_load_estimate\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "lineWidth": 2, "fillOpacity": 0 }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 42,
+      "title": "TRV preheat time by room",
+      "description": "Each TRV's own estimate of how long it needs to preheat the room to reach setpoint. A rising trend for one room relative to the others is an early signal of reduced radiator output, before it shows up as a visible temperature shortfall.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 60 },
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Parlour\" FROM \"sensor.parlour_trv_preheat_time\" WHERE $timeFilter" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Kitchen\" FROM \"sensor.kitchen_trv_preheat_time\" WHERE $timeFilter" },
+        { "refId": "C", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Hallway\" FROM \"sensor.hallway_downstairs_trv_preheat_time\" WHERE $timeFilter" },
+        { "refId": "D", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bedroom\" FROM \"sensor.bedroom_trv_preheat_time\" WHERE $timeFilter" },
+        { "refId": "E", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Bathroom\" FROM \"sensor.bathroom_trv_preheat_time\" WHERE $timeFilter" },
+        { "refId": "F", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT \"value\" AS \"Home Office\" FROM \"sensor.home_office_trv_preheat_time\" WHERE $timeFilter" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "m",
+          "custom": { "lineWidth": 2, "fillOpacity": 0 }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      }
+    },
+    {
+      "id": 43,
+      "title": "Outdoor temp vs boiler duty cycle (7d)",
+      "description": "Overlays outdoor temperature against the boiler's hourly duty cycle %, independent of the dashboard time range (fixed to the last 7 days) since the correlation needs more history than 24h to be visible. A room-by-room version of this — outdoor delta vs that room's demand — would isolate which room loses heat fastest per degree, but that needs per-room demand time averaged the same way; ask if you want that broken out.",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 68 },
+      "timeFrom": "7d",
+      "datasource": { "type": "influxdb", "uid": "ff0wxi3sjn2m8a" },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT mean(\"temperature\") AS \"Outdoor temp\" FROM \"weather.forecast_home\" WHERE $timeFilter GROUP BY time(1h)" },
+        { "refId": "B", "rawQuery": true, "resultFormat": "time_series", "query": "SELECT mean(\"state\") * 100 AS \"Boiler duty %\" FROM (SELECT last(\"value\") AS \"state\" FROM \"binary_sensor.house_heating_boiler_firing\" WHERE $timeFilter GROUP BY time(1m) fill(previous)) WHERE $timeFilter GROUP BY time(1h)" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Outdoor temp" }, "properties": [{ "id": "unit", "value": "celsius" }] },
+          { "matcher": { "id": "byName", "options": "Boiler duty %" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "custom.axisPlacement", "value": "right" }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
       }
     }
   ]
