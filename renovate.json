@@ -3,6 +3,7 @@
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
   "labels": [
     "dependencies"
   ],
@@ -35,6 +36,11 @@
       "groupName": "home automation",
       "automerge": false,
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Skip x.y.0 releases of Home Assistant; wait for the first point release",
+      "matchPackageNames": ["ghcr.io/home-assistant/home-assistant"],
+      "allowedVersions": "!/\\.0$/"
     },
     {
       "matchPackageNames": [
