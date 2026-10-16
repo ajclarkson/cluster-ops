@@ -22,4 +22,3 @@ resources:
 - homerun-system-bridge.yaml
 - x509-certificate-exporter.yaml
 - goldilocks.yaml
-- homepage.yaml

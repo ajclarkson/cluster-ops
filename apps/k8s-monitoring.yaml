@@ -202,7 +202,6 @@ spec:
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://goldilocks.local.clarksons.me/", __param_module = "http_302", instance = "goldilocks"},
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://longhorn.local.clarksons.me/", __param_module = "http_302", instance = "longhorn"},
               {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://sso.local.clarksons.me/", __param_module = "http_302", instance = "keycloak"},
-              {__address__ = "blackbox-exporter-prometheus-blackbox-exporter.blackbox-exporter.svc.cluster.local:9115", __param_target = "https://status.local.clarksons.me/", __param_module = "http_302", instance = "homepage"},
             ]
             metrics_path    = "/probe"
             scrape_interval = "60s"
