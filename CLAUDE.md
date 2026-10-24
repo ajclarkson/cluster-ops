@@ -80,10 +80,11 @@ Grafana resources are managed in `terraform/grafana/`. Provider: grafana v4. Sta
 - `cluster-health.json` — node memory/CPU %, PVC disk %, pod restarts table, OOM events log
 - `ha-stack-health.json` — HA/z2m/node-red/mosquitto restart stats, container memory, error rates, recent errors
 - `ha-behaviour.json` — home automation decision stats, subsystem activity, decision log, errors; filtered by `$location` and `$subsystem`
+- `energy.json` — Agile vs Flexible/Flex E7/Cosy/18M Fixed: all-in p/kWh, cumulative gap, daily cost, kWh, Agile rate. Uses the InfluxDB datasource (uid `ff0wxi3sjn2m8a`, Flux). Days are keyed on each sensor's `last_reset`, not the point time, because HA stamps totals 1-2 days late
 
 ### Known gotchas
 - **Loki alert data blocks** need `query_type = "range"` as a top-level HCL attribute (not just inside `model` jsonencode) — otherwise Terraform diffs on every apply
-- **Dashboard datasource UIDs** are hardcoded: Mimir = `cf6z4wiex30u8e`, Loki = `"loki"` (stream label UID)
+- **Dashboard datasource UIDs** are hardcoded: Mimir = `cf6z4wiex30u8e`, Loki = `"loki"` (stream label UID), InfluxDB = `ff0wxi3sjn2m8a`
 - **Dashboard state drift**: if a folder containing Terraform-managed dashboards is deleted in the UI, Grafana deletes the dashboards too. Fix: `terraform state rm grafana_dashboard.<name>` then `terraform apply` to recreate
 - **Contact point provisioning lock**: API-provisioned contact points show "provisioned, cannot be deleted via UI" — delete via Grafana API if needed
 - **Loki datasource name is case-sensitive**: `name = "Loki"` (capital L) in `data "grafana_data_source"` lookups

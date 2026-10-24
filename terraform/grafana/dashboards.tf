@@ -29,3 +29,7 @@ resource "grafana_dashboard" "storage_health" {
 resource "grafana_dashboard" "central_heating" {
   config_json = file("${path.module}/dashboards/central-heating.json")
 }
+
+resource "grafana_dashboard" "energy" {
+  config_json = file("${path.module}/dashboards/energy.json")
+}

@@ -1,0 +1,259 @@
+{
+  "title": "Energy \u2014 Agile vs Alternatives",
+  "uid": "rackman-energy",
+  "description": "Octopus Agile cost against Flexible, Flexible E7, Cosy and 18M Fixed on the same usage",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "1h",
+  "time": {
+    "from": "now-14d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Average all-in price (p/kWh)",
+      "description": "Total cost including standing charge divided by total kWh, over the selected range. Lower is better.",
+      "type": "bargauge",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff0wxi3sjn2m8a"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff0wxi3sjn2m8a"
+          },
+          "query": "import \"date\"\nimport \"strings\"\ncost = from(bucket: \"Home Assistant\")\n  |> range(start: date.sub(d: 3d, from: v.timeRangeStart), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"GBP\" and (r._field == \"value\" or r._field == \"last_reset_str\") and r.entity_id =~ /^octopus_energy_electricity_.*_previous_accumulative_cost(_cosy_octopus|_flexible_octopus|_flexible_octopus_economy_7|_octopus_18_fix)?$/)\n  |> pivot(rowKey: [\"_time\", \"entity_id\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.value and exists r.last_reset_str)\n  |> map(fn: (r) => ({r with _time: date.truncate(t: date.add(d: 1h, to: time(v: strings.replace(v: r.last_reset_str, t: \" \", u: \"T\", i: 1))), unit: 1d), _value: r.value, tariff: if r.entity_id =~ /_cosy_octopus$/ then \"Cosy\" else if r.entity_id =~ /_flexible_octopus_economy_7$/ then \"FlexE7\" else if r.entity_id =~ /_flexible_octopus$/ then \"Flexible\" else if r.entity_id =~ /_octopus_18_fix$/ then \"Fixed\" else \"Agile\"}))\n  |> filter(fn: (r) => r._time >= date.truncate(t: v.timeRangeStart, unit: 1d) and r._time < v.timeRangeStop)\n  |> group(columns: [\"entity_id\", \"tariff\", \"_time\"])\n  |> last()\n  |> group(columns: [\"entity_id\", \"tariff\"])\n  |> sort(columns: [\"_time\"])\n  |> keep(columns: [\"_time\", \"_value\", \"tariff\"])\n  |> group()\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"tariff\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.Agile and exists r.Cosy and exists r.Flexible and exists r.FlexE7 and exists r.Fixed)\n\nkwh = from(bucket: \"Home Assistant\")\n  |> range(start: date.sub(d: 3d, from: v.timeRangeStart), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"kWh\" and (r._field == \"value\" or r._field == \"last_reset_str\") and r.entity_id =~ /^octopus_energy_electricity_.*_previous_accumulative_consumption$/)\n  |> pivot(rowKey: [\"_time\", \"entity_id\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.value and exists r.last_reset_str)\n  |> map(fn: (r) => ({r with _time: date.truncate(t: date.add(d: 1h, to: time(v: strings.replace(v: r.last_reset_str, t: \" \", u: \"T\", i: 1))), unit: 1d), _value: r.value, tariff: if r.entity_id =~ /_cosy_octopus$/ then \"Cosy\" else if r.entity_id =~ /_flexible_octopus_economy_7$/ then \"FlexE7\" else if r.entity_id =~ /_flexible_octopus$/ then \"Flexible\" else if r.entity_id =~ /_octopus_18_fix$/ then \"Fixed\" else \"Agile\"}))\n  |> filter(fn: (r) => r._time >= date.truncate(t: v.timeRangeStart, unit: 1d) and r._time < v.timeRangeStop)\n  |> group(columns: [\"entity_id\", \"tariff\", \"_time\"])\n  |> last()\n  |> group(columns: [\"entity_id\", \"tariff\"])\n  |> sort(columns: [\"_time\"])\n  |> keep(columns: [\"_time\", \"_value\"])\n  |> group()\n  |> rename(columns: {_value: \"kwh\"})\n\njoin(tables: {c: cost, k: kwh}, on: [\"_time\"])\n  |> reduce(\n    identity: {kwh: 0.0, Agile: 0.0, Cosy: 0.0, Flexible: 0.0, FlexE7: 0.0, Fixed: 0.0},\n    fn: (r, accumulator) => ({kwh: accumulator.kwh + r.kwh, Agile: accumulator.Agile + r.Agile, Cosy: accumulator.Cosy + r.Cosy, Flexible: accumulator.Flexible + r.Flexible, FlexE7: accumulator.FlexE7 + r.FlexE7, Fixed: accumulator.Fixed + r.Fixed})\n  )\n  |> map(fn: (r) => ({Agile: r.Agile / r.kwh * 100.0, Cosy: r.Cosy / r.kwh * 100.0, Flexible: r.Flexible / r.kwh * 100.0, \"Flex E7\": r.FlexE7 / r.kwh * 100.0, \"Fixed 18M\": r.Fixed / r.kwh * 100.0}))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Agile vs alternatives (cumulative \u00a3)",
+      "description": "Running total of Agile cost minus the alternative's cost over days where all tariffs have data. Above zero: Agile has cost more (behind). Below zero: ahead.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff0wxi3sjn2m8a"
+      },
+      "gridPos": {
+        "x": 10,
+        "y": 0,
+        "w": 14,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff0wxi3sjn2m8a"
+          },
+          "query": "import \"date\"\nimport \"strings\"\nfrom(bucket: \"Home Assistant\")\n  |> range(start: date.sub(d: 3d, from: v.timeRangeStart), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"GBP\" and (r._field == \"value\" or r._field == \"last_reset_str\") and r.entity_id =~ /^octopus_energy_electricity_.*_previous_accumulative_cost(_cosy_octopus|_flexible_octopus|_flexible_octopus_economy_7|_octopus_18_fix)?$/)\n  |> pivot(rowKey: [\"_time\", \"entity_id\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.value and exists r.last_reset_str)\n  |> map(fn: (r) => ({r with _time: date.truncate(t: date.add(d: 1h, to: time(v: strings.replace(v: r.last_reset_str, t: \" \", u: \"T\", i: 1))), unit: 1d), _value: r.value, tariff: if r.entity_id =~ /_cosy_octopus$/ then \"Cosy\" else if r.entity_id =~ /_flexible_octopus_economy_7$/ then \"FlexE7\" else if r.entity_id =~ /_flexible_octopus$/ then \"Flexible\" else if r.entity_id =~ /_octopus_18_fix$/ then \"Fixed\" else \"Agile\"}))\n  |> filter(fn: (r) => r._time >= date.truncate(t: v.timeRangeStart, unit: 1d) and r._time < v.timeRangeStop)\n  |> group(columns: [\"entity_id\", \"tariff\", \"_time\"])\n  |> last()\n  |> group(columns: [\"entity_id\", \"tariff\"])\n  |> sort(columns: [\"_time\"])\n  |> keep(columns: [\"_time\", \"_value\", \"tariff\"])\n  |> group()\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"tariff\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.Agile and exists r.Cosy and exists r.Flexible and exists r.FlexE7 and exists r.Fixed)\n  |> map(fn: (r) => ({_time: r._time, \"Agile vs Cosy\": r.Agile - r.Cosy, \"Agile vs Flexible\": r.Agile - r.Flexible, \"Agile vs Flex E7\": r.Agile - r.FlexE7, \"Agile vs Fixed\": r.Agile - r.Fixed}))\n  |> cumulativeSum(columns: [\"Agile vs Cosy\", \"Agile vs Flexible\", \"Agile vs Flex E7\", \"Agile vs Fixed\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyGBP",
+          "decimals": 2,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Daily cost per tariff (\u00a3)",
+      "description": "What each tariff would have charged for the day, including standing charge. Same kWh for all.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff0wxi3sjn2m8a"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 14,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff0wxi3sjn2m8a"
+          },
+          "query": "import \"date\"\nimport \"strings\"\nfrom(bucket: \"Home Assistant\")\n  |> range(start: date.sub(d: 3d, from: v.timeRangeStart), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"GBP\" and (r._field == \"value\" or r._field == \"last_reset_str\") and r.entity_id =~ /^octopus_energy_electricity_.*_previous_accumulative_cost(_cosy_octopus|_flexible_octopus|_flexible_octopus_economy_7|_octopus_18_fix)?$/)\n  |> pivot(rowKey: [\"_time\", \"entity_id\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.value and exists r.last_reset_str)\n  |> map(fn: (r) => ({r with _time: date.truncate(t: date.add(d: 1h, to: time(v: strings.replace(v: r.last_reset_str, t: \" \", u: \"T\", i: 1))), unit: 1d), _value: r.value, tariff: if r.entity_id =~ /_cosy_octopus$/ then \"Cosy\" else if r.entity_id =~ /_flexible_octopus_economy_7$/ then \"FlexE7\" else if r.entity_id =~ /_flexible_octopus$/ then \"Flexible\" else if r.entity_id =~ /_octopus_18_fix$/ then \"Fixed\" else \"Agile\"}))\n  |> filter(fn: (r) => r._time >= date.truncate(t: v.timeRangeStart, unit: 1d) and r._time < v.timeRangeStop)\n  |> group(columns: [\"entity_id\", \"tariff\", \"_time\"])\n  |> last()\n  |> group(columns: [\"entity_id\", \"tariff\"])\n  |> sort(columns: [\"_time\"])\n  |> keep(columns: [\"_time\", \"_value\", \"tariff\"])\n  |> group(columns: [\"tariff\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyGBP",
+          "displayName": "${__field.labels.tariff}",
+          "decimals": 2,
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "sum"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Daily consumption (kWh)",
+      "description": "Electricity imported per day.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff0wxi3sjn2m8a"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 8,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff0wxi3sjn2m8a"
+          },
+          "query": "import \"date\"\nimport \"strings\"\nfrom(bucket: \"Home Assistant\")\n  |> range(start: date.sub(d: 3d, from: v.timeRangeStart), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"kWh\" and (r._field == \"value\" or r._field == \"last_reset_str\") and r.entity_id =~ /^octopus_energy_electricity_.*_previous_accumulative_consumption$/)\n  |> pivot(rowKey: [\"_time\", \"entity_id\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.value and exists r.last_reset_str)\n  |> map(fn: (r) => ({r with _time: date.truncate(t: date.add(d: 1h, to: time(v: strings.replace(v: r.last_reset_str, t: \" \", u: \"T\", i: 1))), unit: 1d), _value: r.value, tariff: if r.entity_id =~ /_cosy_octopus$/ then \"Cosy\" else if r.entity_id =~ /_flexible_octopus_economy_7$/ then \"FlexE7\" else if r.entity_id =~ /_flexible_octopus$/ then \"Flexible\" else if r.entity_id =~ /_octopus_18_fix$/ then \"Fixed\" else \"Agile\"}))\n  |> filter(fn: (r) => r._time >= date.truncate(t: v.timeRangeStart, unit: 1d) and r._time < v.timeRangeStop)\n  |> group(columns: [\"entity_id\", \"tariff\", \"_time\"])\n  |> last()\n  |> group(columns: [\"entity_id\", \"tariff\"])\n  |> sort(columns: [\"_time\"])\n  |> keep(columns: [\"_time\", \"_value\"])\n  |> group()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "decimals": 1,
+          "displayName": "kWh",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Agile unit rate (p/kWh, 30m mean)",
+      "description": "Half-hourly Agile import rate.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ff0wxi3sjn2m8a"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ff0wxi3sjn2m8a"
+          },
+          "query": "from(bucket: \"Home Assistant\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"GBP/kWh\" and r._field == \"value\" and r.entity_id =~ /^octopus_energy_electricity_.*_current_rate$/)\n  |> aggregateWindow(every: 30m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _value: r._value * 100.0}))\n  |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 1,
+          "displayName": "Agile rate",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    }
+  ]
+}
