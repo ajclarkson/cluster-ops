@@ -27,7 +27,7 @@ spec:
       containers:
         - name: zigbee2mqtt-exporter
           # ghcr.io/d0ugal/zigbee2mqtt-exporter:latest — pinned to digest 2026-06-07
-          image: ghcr.io/d0ugal/zigbee2mqtt-exporter@sha256:c03a13b615a9621fdf3930ffecfc9ab789a5f87f0891ede18ecef97ef11f3346
+          image: ghcr.io/d0ugal/zigbee2mqtt-exporter@sha256:1c9b36e473153b5280ff2de042fa4a8e2026e18594629d8047a3945216902364
           imagePullPolicy: IfNotPresent
           env:
             - name: Z2M_EXPORTER_WEBSOCKET_URL
