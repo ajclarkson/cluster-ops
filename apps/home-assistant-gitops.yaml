@@ -67,7 +67,7 @@ data:
         templates/*)
           [ $TEMPLATE_DONE -eq 0 ] && ha_reload template reload && TEMPLATE_DONE=1 ;;
         dashboard.yaml|views/*|www/*)
-          [ $LOVELACE_DONE -eq 0 ] && echo "[reload] Dashboard/www changed — browser hard-refresh required" && LOVELACE_DONE=1 ;;
+          [ $LOVELACE_DONE -eq 0 ] && echo "[reload] Dashboard/www changed — www-sync copies assets within 60s; browser hard-refresh required" && LOVELACE_DONE=1 ;;
         packages/*)
           [ $CORE_DONE -eq 0 ] && ha_reload homeassistant reload_core_config && CORE_DONE=1 ;;
         configuration.yaml)

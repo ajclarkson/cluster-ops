@@ -219,6 +219,53 @@ spec:
               memory: 64Mi
             limits:
               memory: 128Mi
+        # HA serves /local/* from /config/www on the PVC, which git-sync (uid 65533,
+        # no PVC mount) cannot write. This root sidecar copies the repo's top-level
+        # www/*.js and www/*.css there. Copy-only: never deletes, so hand-placed files
+        # and the community/ and tapo_control/ dirs are left alone.
+        - name: www-sync
+          image: "busybox:1.37.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              SRC=/git-config/current/www
+              DST=/config/www
+              while true; do
+                # Skip quietly until git-sync has produced the repo and HA has made www/.
+                if [ -d "$SRC" ] && [ -d "$DST" ]; then
+                  for f in "$SRC"/*.js "$SRC"/*.css; do
+                    [ -f "$f" ] || continue
+                    name=$(basename "$f")
+                    cmp -s "$f" "$DST/$name" && continue
+                    # Temp file + rename in the same dir so HA never serves a partial file.
+                    tmp="$DST/.$name.www-sync"
+                    if cp "$f" "$tmp" && chmod 644 "$tmp" && mv "$tmp" "$DST/$name"; then
+                      echo "[www-sync] copied $name"
+                    else
+                      echo "[www-sync] ERROR copying $name" >&2
+                      rm -f "$tmp"
+                    fi
+                  done
+                fi
+                sleep 60
+              done
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: git-config
+              mountPath: /git-config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
       volumes:
         - name: config
           persistentVolumeClaim:
