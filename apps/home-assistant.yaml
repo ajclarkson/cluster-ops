@@ -224,7 +224,7 @@ spec:
         # www/*.js and www/*.css there. Copy-only: never deletes, so hand-placed files
         # and the community/ and tapo_control/ dirs are left alone.
         - name: www-sync
-          image: "busybox:1.37.0"
+          image: "busybox:1.38.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
