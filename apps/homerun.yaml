@@ -49,6 +49,12 @@ data:
       enabled: true
       timeoutMs: 8000
 
+    # Retained per-location and house-wide decision history (homerun/{location}/history,
+    # homerun/history), read by Pulse to explain why lights did or didn't change.
+    history:
+      size: 20
+      houseSize: 30
+
     options:
       dry_run: false
 ---
