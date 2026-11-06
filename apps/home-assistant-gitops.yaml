@@ -9,6 +9,10 @@ kind: ConfigMap
 metadata:
   name: ha-reload-hook
   namespace: home-assistant
+  annotations:
+    # reload.sh is full of bash parameter expansions; Flux postBuild envsubst would
+    # fail on them (and nothing here uses Flux variables).
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
   reload.sh: |
     #!/usr/bin/env bash
