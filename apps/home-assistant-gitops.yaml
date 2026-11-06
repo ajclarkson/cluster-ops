@@ -1,7 +1,9 @@
 ---
 # Reload hook executed by git-sync after every successful sync that produces changes.
 # Diffs changed files against the previous sync hash and calls only the affected
-# HA reload services, avoiding unnecessary full restarts.
+# HA reload services, avoiding unnecessary full restarts. For packages/*.yaml the
+# services are chosen from the top-level domain keys at both revisions; domains
+# with no reload service log a "needs HA restart" warning.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -41,44 +43,121 @@ data:
 
     echo "[reload] $OLD_HASH..$NEW_HASH — changed: $(echo "$CHANGED" | tr '\n' ' ')"
 
+    # Failure policy. A reload that HA rejects (HTTP 4xx/5xx, typically invalid
+    # YAML) will not heal by retrying the same commit, so the hash is still
+    # recorded and the hook exits non-zero at the end with every failed service
+    # listed: loud, but no retry loop. HA being unreachable (curl status 000, e.g.
+    # during a restart) is transient and the reload would be lost for good once
+    # the hash advances, so that case exits before the hash is written and the
+    # whole diff is retried; reloads are idempotent.
+    FAILED=""
+    UNREACHABLE=0
+    declare -A CALLED=()
+
     ha_reload() {
       local domain="$1" service="$2"
-      echo "[reload] Calling $domain.$service"
-      curl -s -o /dev/null \
+      local key="$domain.$service"
+      [ -n "${CALLED[$key]:-}" ] && return 0
+      CALLED[$key]=1
+      echo "[reload] Calling $key"
+      local status
+      status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 \
         -X POST \
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/json" \
-        "$HA_URL/api/services/$domain/$service"
+        "$HA_URL/api/services/$domain/$service") || status=000
+      case "$status" in
+        2??) ;;
+        000)
+          echo "[reload] ERROR: $key failed: HA unreachable"
+          UNREACHABLE=1
+          FAILED="$FAILED $key" ;;
+        *)
+          echo "[reload] ERROR: $key failed: HTTP $status"
+          FAILED="$FAILED $key" ;;
+      esac
+      return 0
     }
 
-    SCENE_DONE=0
-    SCRIPT_DONE=0
-    TEMPLATE_DONE=0
-    LOVELACE_DONE=0
-    CORE_DONE=0
+    # Top-level keys of a package file at one revision. Matches unindented
+    # "key:" and the "key name:" split form (e.g. "sensor 2:"); comments, "---"
+    # and values such as "!include x.yaml" never start a line with a key, so
+    # they are ignored. A file absent at that revision (added or deleted) has no
+    # keys.
+    domains_at() {
+      local rev="$1" file="$2"
+      git -C "$REPO" cat-file -e "$rev:$file" 2>/dev/null || return 0
+      git -C "$REPO" show "$rev:$file" \
+        | { grep -E '^[a-z_][a-z0-9_]*( [^:#]+)?:' || true; } \
+        | sed -E 's/^([a-z_][a-z0-9_]*).*/\1/' \
+        | sort -u
+    }
+
+    # Domain -> reload service, each verified in HA core 2026.10.1 (the running
+    # version) as a service in components/<domain>/services.yaml and registered
+    # in its setup. "homeassistant" covers customize, name, unit_system etc.
+    reload_for_domain() {
+      local domain="$1" file="$2"
+      case "$domain" in
+        template|mqtt|input_boolean|input_number|input_select|input_text|\
+    input_datetime|input_button|timer|schedule|group|scene|script|automation|\
+    zone|person)
+          ha_reload "$domain" reload ;;
+        homeassistant)
+          ha_reload homeassistant reload_core_config ;;
+        # No reload service exists (counter has none in 2026.10.1) or the
+        # integration only reads YAML at startup.
+        counter|recorder|frontend|http|logger|logbook|history|default_config|\
+    system_log|api|config|energy|lovelace|mobile_app|websocket_api|cloud|\
+    conversation|assist_pipeline|tts|stt|wake_word|influxdb|prometheus)
+          echo "[reload] WARNING: needs HA restart: $domain in $file" ;;
+        *)
+          echo "[reload] WARNING: unknown domain '$domain' in $file — no reload mapped, may need HA restart" ;;
+      esac
+    }
+
+    reload_package() {
+      local file="$1" domain
+      while IFS= read -r domain; do
+        if [ -n "$domain" ]; then reload_for_domain "$domain" "$file"; fi
+      done < <({ domains_at "$OLD_HASH" "$file"; domains_at "$NEW_HASH" "$file"; } | sort -u)
+    }
+
     WARN_CONFIG=0
+    LOVELACE_DONE=0
 
     while IFS= read -r file; do
       case "$file" in
         scenes.yaml)
-          [ $SCENE_DONE -eq 0 ] && ha_reload scene reload && SCENE_DONE=1 ;;
+          ha_reload scene reload ;;
         scripts.yaml)
-          [ $SCRIPT_DONE -eq 0 ] && ha_reload script reload && SCRIPT_DONE=1 ;;
+          ha_reload script reload ;;
         templates/*)
-          [ $TEMPLATE_DONE -eq 0 ] && ha_reload template reload && TEMPLATE_DONE=1 ;;
+          ha_reload template reload ;;
         dashboard.yaml|views/*|www/*)
-          [ $LOVELACE_DONE -eq 0 ] && echo "[reload] Dashboard/www changed — www-sync copies assets within 60s; browser hard-refresh required" && LOVELACE_DONE=1 ;;
-        packages/*)
-          [ $CORE_DONE -eq 0 ] && ha_reload homeassistant reload_core_config && CORE_DONE=1 ;;
+          [ $LOVELACE_DONE -eq 0 ] && echo "[reload] Dashboard/www changed — www-sync copies assets within 60s; reopen the dashboard to pick up pulse-card.js (pulse-card-loader, no hard refresh needed)"
+          LOVELACE_DONE=1 ;;
+        packages/*.yaml)
+          reload_package "$file" ;;
         configuration.yaml)
-          [ $CORE_DONE -eq 0 ] && ha_reload homeassistant reload_core_config && CORE_DONE=1
+          ha_reload homeassistant reload_core_config
           WARN_CONFIG=1 ;;
       esac
     done <<< "$CHANGED"
 
     [ $WARN_CONFIG -eq 1 ] && echo "[reload] WARNING: configuration.yaml changed — some changes require a pod restart"
 
+    if [ $UNREACHABLE -eq 1 ]; then
+      echo "[reload] ERROR: HA unreachable, hash not recorded; will retry. Failed:$FAILED"
+      exit 1
+    fi
+
     echo "$NEW_HASH" > "$HASH_FILE"
+
+    if [ -n "$FAILED" ]; then
+      echo "[reload] ERROR: reload failed for:$FAILED — reload these manually in HA"
+      exit 1
+    fi
 ---
 # Long-lived HA token used by the reload hook to call the HA API.
 # Create a long-lived token in HA (Profile → Security → Long-lived access tokens)
