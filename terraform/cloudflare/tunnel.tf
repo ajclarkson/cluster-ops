@@ -54,3 +54,26 @@ resource "cloudflare_dns_record" "tunnel_routes" {
   proxied = true
   ttl     = 1
 }
+
+# HA serves /local/* with max-age=31d, and Cloudflare caches it at the edge,
+# so updated files (e.g. pulse-card.js) stay stale off-WiFi. Bypass the edge
+# cache for these paths; the origin's headers still govern browser caching.
+resource "cloudflare_ruleset" "ha_local_no_cache" {
+  zone_id     = var.cloudflare_zone_id
+  name        = "Bypass edge cache for Home Assistant /local"
+  description = "Never cache HA /local/* at the Cloudflare edge"
+  kind        = "zone"
+  phase       = "http_request_cache_settings"
+
+  rules = [
+    {
+      description = "Bypass cache for HA /local/*"
+      action      = "set_cache_settings"
+      enabled     = true
+      expression  = "http.host eq \"${local.tunnel_routes["home"].hostname}\" and starts_with(http.request.uri.path, \"/local/\")"
+      action_parameters = {
+        cache = false
+      }
+    }
+  ]
+}
