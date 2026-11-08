@@ -37,7 +37,18 @@ data:
       exit 0
     fi
 
-    CHANGED=$(git -C "$REPO" diff --name-only "$OLD_HASH" "$NEW_HASH" 2>/dev/null || true)
+    # The previous hash can be absent from the checkout (history rewritten, or
+    # the repo re-cloned). Then the diff is impossible, so reload everything
+    # rather than guess. Any other diff failure is fatal (set -e): the hash is
+    # not advanced and the failure is visible, never "No file changes".
+    FULL_RELOAD=0
+    if ! git -C "$REPO" cat-file -e "$OLD_HASH^{commit}"; then
+      echo "[reload] WARNING: previous hash $OLD_HASH not in repo; running every reload"
+      FULL_RELOAD=1
+      CHANGED=$(git -C "$REPO" ls-tree -r --name-only "$NEW_HASH")
+    else
+      CHANGED=$(git -C "$REPO" diff --name-only "$OLD_HASH" "$NEW_HASH")
+    fi
 
     if [ -z "$CHANGED" ]; then
       echo "[reload] No file changes between $OLD_HASH..$NEW_HASH"
@@ -121,10 +132,16 @@ data:
     }
 
     reload_package() {
-      local file="$1" domain
+      local file="$1" domain domains
+      # Assigned first (not process substitution) so a failed git show fails the hook.
+      if [ $FULL_RELOAD -eq 1 ]; then
+        domains=$(domains_at "$NEW_HASH" "$file" | sort -u)
+      else
+        domains=$({ domains_at "$OLD_HASH" "$file"; domains_at "$NEW_HASH" "$file"; } | sort -u)
+      fi
       while IFS= read -r domain; do
         if [ -n "$domain" ]; then reload_for_domain "$domain" "$file"; fi
-      done < <({ domains_at "$OLD_HASH" "$file"; domains_at "$NEW_HASH" "$file"; } | sort -u)
+      done <<< "$domains"
     }
 
     WARN_CONFIG=0
