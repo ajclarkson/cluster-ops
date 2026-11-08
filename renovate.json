@@ -73,6 +73,14 @@
         "!eclipse-mosquitto",
         "!koenkk/zigbee2mqtt"
       ]
+    },
+    {
+      "description": "homerun releases must not need same-day config changes; homerun-automations CI is the compatibility check",
+      "matchPackageNames": ["ghcr.io/ajclarkson/homerun"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "schedule": ["every weekend"],
+      "minimumReleaseAge": "3 days"
     }
   ],
   "rebaseWhen": "behind-base-branch",

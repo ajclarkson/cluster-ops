@@ -41,6 +41,7 @@ data:
 
     automations:
       dir: /sync/automations
+      ignore: [lib, types]
 
     metrics:
       enabled: true
@@ -84,8 +85,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: homerun
-          image: ghcr.io/ajclarkson/homerun:edge
-          imagePullPolicy: Always
+          image: ghcr.io/ajclarkson/homerun:0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7070
               name: api
