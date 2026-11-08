@@ -126,11 +126,11 @@ spec:
 
       initContainers:
         - name: git-sync-init
-          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          image: "registry.k8s.io/git-sync/git-sync:v4.8.0"
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
-            - --branch=main
+            - --ref=deploy
             - --root=/git-config
             - --link=current
             - --depth=0
@@ -194,15 +194,18 @@ spec:
             limits:
               memory: "1.75Gi"
         - name: git-sync
-          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          image: "registry.k8s.io/git-sync/git-sync:v4.8.0"
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
-            - --branch=main
+            - --ref=deploy
             - --root=/git-config
             - --link=current
             - --depth=0
             - --period=60s
+            # Retry forever: a GitHub blip must not crash-loop the sidecar. The init
+            # container deliberately keeps the default (0) so a pod that cannot sync fails.
+            - --max-failures=-1
             - --exechook-command=/hooks/reload.sh
             - --exechook-timeout=30s
           volumeMounts:
