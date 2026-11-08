@@ -85,7 +85,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: homerun
-          image: ghcr.io/ajclarkson/homerun:0.1.0
+          image: ghcr.io/ajclarkson/homerun:0.2.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7070
