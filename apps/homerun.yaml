@@ -41,6 +41,7 @@ data:
 
     automations:
       dir: /sync/automations
+      ignore: [lib, types]
 
     metrics:
       enabled: true
