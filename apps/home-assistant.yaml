@@ -126,13 +126,16 @@ spec:
 
       initContainers:
         - name: git-sync-init
-          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          image: "registry.k8s.io/git-sync/git-sync:v4.8.0"
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
             - --branch=main
             - --root=/git-config
             - --link=current
+            # git-sync >= v4.8.0 no longer sets safe.directory=* itself (upstream #993); without it git
+            # rejects the volume as "dubious ownership". Restores the v4.7.1 behaviour.
+            - --git-config-add=safe.directory:*
             - --depth=0
             - --one-time
           volumeMounts:
@@ -194,13 +197,16 @@ spec:
             limits:
               memory: "1.75Gi"
         - name: git-sync
-          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          image: "registry.k8s.io/git-sync/git-sync:v4.8.0"
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
             - --branch=main
             - --root=/git-config
             - --link=current
+            # git-sync >= v4.8.0 no longer sets safe.directory=* itself (upstream #993); without it git
+            # rejects the volume as "dubious ownership". Restores the v4.7.1 behaviour.
+            - --git-config-add=safe.directory:*
             - --depth=0
             - --period=60s
             - --exechook-command=/hooks/reload.sh
