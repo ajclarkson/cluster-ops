@@ -130,7 +130,7 @@ spec:
               # 12 MB/day and OOM-killed the pod on 2026-11-18. Restore once fixed.
               memory: "384Mi"
         - name: git-sync
-          image: registry.k8s.io/git-sync/git-sync:v4.7.1
+          image: registry.k8s.io/git-sync/git-sync:v4.8.0
           args:
             - --repo=https://github.com/ajclarkson/homerun-automations
             - --root=/sync
