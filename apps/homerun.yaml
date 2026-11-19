@@ -95,6 +95,10 @@ spec:
               value: /config/configuration.yaml
             - name: TZ
               value: Europe/London
+            # Heap snapshots on demand while tracking the external-memory leak:
+            # `kill -USR2 1` writes a .heapsnapshot into /diag. SIGUSR1 is taken (rescan).
+            - name: NODE_OPTIONS
+              value: --heapsnapshot-signal=SIGUSR2 --diagnostic-dir=/diag
           livenessProbe:
             httpGet:
               path: /health/live
@@ -116,11 +120,15 @@ spec:
               mountPath: /config/secrets.yaml
               subPath: secrets.yaml
               readOnly: true
+            - name: diag
+              mountPath: /diag
           resources:
             requests:
               memory: "128Mi"
             limits:
-              memory: "256Mi"
+              # Raised from 256Mi while the external-memory leak is found: it grows about
+              # 12 MB/day and OOM-killed the pod on 2026-11-18. Restore once fixed.
+              memory: "384Mi"
         - name: git-sync
           image: registry.k8s.io/git-sync/git-sync:v4.7.1
           args:
@@ -149,6 +157,9 @@ spec:
         - name: secrets
           secret:
             secretName: homerun-secrets-file
+        - name: diag
+          emptyDir:
+            sizeLimit: 1Gi
 ---
 apiVersion: v1
 kind: Service
