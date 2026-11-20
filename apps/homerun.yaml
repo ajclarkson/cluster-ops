@@ -59,6 +59,21 @@ data:
     options:
       dry_run: false
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homerun-buffer-pool
+  namespace: homerun
+data:
+  buffer-pool.cjs: |
+    // Temporary: the MQTT packet library caches small Buffers forever, and each one
+    // pins a whole shared pool block. With poolSize 0 every allocation owns its memory.
+    const { Buffer } = require('node:buffer');
+    Buffer.poolSize = 0;
+    if (Buffer.allocUnsafe(4).buffer.byteLength !== 4) {
+      throw new Error('buffer-pool preload: Buffer.poolSize = 0 did not disable pooling');
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -98,7 +113,7 @@ spec:
             # Heap snapshots on demand while tracking the external-memory leak:
             # `kill -USR2 1` writes a .heapsnapshot into /diag. SIGUSR1 is taken (rescan).
             - name: NODE_OPTIONS
-              value: --heapsnapshot-signal=SIGUSR2 --diagnostic-dir=/diag
+              value: --heapsnapshot-signal=SIGUSR2 --diagnostic-dir=/diag --require /preload/buffer-pool.cjs
           livenessProbe:
             httpGet:
               path: /health/live
@@ -112,6 +127,9 @@ spec:
           volumeMounts:
             - name: automations
               mountPath: /sync
+            - name: buffer-pool
+              mountPath: /preload
+              readOnly: true
             - name: config
               mountPath: /config/configuration.yaml
               subPath: configuration.yaml
@@ -163,6 +181,9 @@ spec:
         - name: diag
           emptyDir:
             sizeLimit: 1Gi
+        - name: buffer-pool
+          configMap:
+            name: homerun-buffer-pool
 ---
 apiVersion: v1
 kind: Service
