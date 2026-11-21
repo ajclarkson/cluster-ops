@@ -19,6 +19,7 @@ resources:
 - ntfy.yaml
 - frigate.yaml
 - homerun.yaml
+- household-guide.yaml
 - homerun-system-bridge.yaml
 - x509-certificate-exporter.yaml
 - goldilocks.yaml
