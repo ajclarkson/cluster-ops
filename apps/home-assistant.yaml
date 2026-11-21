@@ -130,7 +130,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
-            - --branch=main
+            - --ref=deploy
             - --root=/git-config
             - --link=current
             # git-sync >= v4.8.0 no longer sets safe.directory=* itself (upstream #993); without it git
@@ -201,7 +201,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --repo=https://github.com/ajclarkson/homeassistant-config
-            - --branch=main
+            - --ref=deploy
             - --root=/git-config
             - --link=current
             # git-sync >= v4.8.0 no longer sets safe.directory=* itself (upstream #993); without it git
@@ -209,6 +209,9 @@ spec:
             - --git-config-add=safe.directory:*
             - --depth=0
             - --period=60s
+            # Retry forever: a GitHub blip must not crash-loop the sidecar. The init
+            # container deliberately keeps the default (0) so a pod that cannot sync fails.
+            - --max-failures=-1
             - --exechook-command=/hooks/reload.sh
             - --exechook-timeout=30s
           volumeMounts:
